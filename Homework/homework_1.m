@@ -10,12 +10,12 @@ nElemNodes = eDegree+1;
 
 % Mesh the 1D nodes
 x = meshNodes_1D(eDomains,nElemNodes);
+% Build element-node connectivity
 eCONN = buildConnectivity_1D(nElemNodes);
 
 plot(x,zeros(size(x)),'-o')
 disp(eCONN)
 
-%% Functions
 %% 2D
 clear
 xMin = 0;
