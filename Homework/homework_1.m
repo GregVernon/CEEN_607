@@ -50,6 +50,7 @@ eCONN = buildConnectivity_2D(nElemNodes);
 % end
 % scatter(x,y,'filled')
 
+%% Mesh Generation Functions
 function x = meshNodes_1D(eDomains,nElemNodes)
 nElem = length(nElemNodes);
 nNodes = (nElem+1) + sum(nElemNodes-2);
