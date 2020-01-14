@@ -35,9 +35,21 @@ nElemNodes{2} = eDegree{2}+1;
 
 % Mesh the 2D nodes
 [x,y] = meshNodes_2D(eDomains,nElemNodes);
+% figure
+% scatter(x,y,'filled')
+% hold on
+% nodeID = 0;
+% for ii = 1:length(x)
+%     nodeID = nodeID+1;
+%     text(x(ii),y(ii),num2str(nodeID),'FontWeight','Bold','FontSize',16)
+% end
 
 % Build element connectivity
 eCONN = buildConnectivity_2D(nElemNodes);
+
+% end
+% scatter(x,y,'filled')
+
 function x = meshNodes_1D(eDomains,nElemNodes)
 nElem = length(nElemNodes);
 nNodes = (nElem+1) + sum(nElemNodes-2);
