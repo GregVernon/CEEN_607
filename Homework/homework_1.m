@@ -88,6 +88,16 @@ nElemNodes{3} = eDegree{3}+1;
 % Build element connectivity
 eCONN = buildConnectivity_3D(nElemNodes);
 
+figure
+scatter3(x,y,z,'filled')
+hold on
+nodeID = 0;
+for ii = 1:length(x)
+    nodeID = nodeID+1;
+    text(x(ii),y(ii),z(ii),num2str(nodeID),'FontWeight','Bold','FontSize',8)
+end
+axis vis3d
+view(60,30)
 %% Mesh Generation Functions
 function x = meshNodes_1D(eDomains,nElemNodes)
 nElem = length(nElemNodes);
