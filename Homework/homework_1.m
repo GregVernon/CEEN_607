@@ -47,6 +47,14 @@ nElemNodes{2} = eDegree{2}+1;
 % Build element connectivity
 eCONN = buildConnectivity_2D(nElemNodes);
 
+% figure
+% hold on
+% cmap = lines(size(eCONN,2));
+% for e = 1:size(eCONN,2)
+%     elemNodes = ~isnan(eCONN(:,e));
+%     px = [x(eCONN(elemNodes,e)); x(eCONN(1,e))];
+%     py = [y(eCONN(elemNodes,e)); y(eCONN(1,e))];
+%     patch(px,py,cmap(e,:))
 % end
 % scatter(x,y,'filled')
 
