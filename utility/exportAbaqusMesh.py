@@ -40,6 +40,7 @@ def exportPartMesh(activeObject):
 	numpy.savetxt(fName, eCONN, fmt="%i", delimiter=",")
 
 def exportAssemblyMesh(activeObject):
+	## ASSEMBLY MESH
 	INSTANCE = activeObject.instances
 	for i in range(0,len(INSTANCE)):
 		exportPartMesh(INSTANCE[i])
