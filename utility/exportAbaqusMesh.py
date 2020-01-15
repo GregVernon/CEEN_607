@@ -24,7 +24,7 @@ def exportPartMesh(activeObject):
 		elemNodes[e] = len(ELEM[e].connectivity)
 	
 	xyz = numpy.zeros(shape=(len(NODES),3),dtype='double')
-	eCONN = numpy.zeros(shape=(len(ELEM),max(elemNodes)),dtype='int')
+	eCONN = numpy.zeros(shape=(len(ELEM),max(elemNodes)),dtype='int') - 1
 	
 	for n in range(0,len(NODES)):
 		nodeLabel = NODES[n].label
