@@ -1,4 +1,4 @@
-function eCONN = buildConnectivity(nElemNodes)
+function [eCONN,eDegree] = buildConnectivity(nElemNodes)
 if iscell(nElemNodes) == true
     nDimensions = length(nElemNodes);
     nElem = cellfun(@length,nElemNodes);
@@ -7,9 +7,11 @@ else
     nElem = length(nElemNodes);
 end
 
+eDegree = zeros(nDimensions,prod(nElem));
 if nDimensions == 1
     eCONN = nan(max(nElemNodes),nElem);
     for e = 1:nElem
+        eDegree(1,e) = nElemNodes(e)-1;
         if e == 1
             nodeIDs = 1:nElemNodes(e);
         else
@@ -30,6 +32,7 @@ elseif nDimensions == 2
     for ey = 1:NY
         for ex = 1:NX
             e = (ey-1)*NY + ex;
+            eDegree(:,e) = [nElemNodes{1}(ex); nElemNodes{2}(ey)] - 1;
             if e == 1
                 xIndex = (1 : 1 + (nElemNodes{1}(ex)-1));
                 yIndex = (1 : 1 + (nElemNodes{2}(ey)-1));
@@ -60,7 +63,8 @@ elseif nDimensions == 3
     for ez = 1:NZ
         for ey = 1:NY
             for ex = 1:NX
-                e = (ey-1)*NY + ex;
+                e = (ez-1)*NY*NX + (ey-1)*NY + ex;
+                eDegree(:,e) = [nElemNodes{1}(ex); nElemNodes{2}(ey); nElemNodes{3}(ez)] - 1;
                 if ex == 1 && ey == 1 && ez == 1
                     xIndex = (1 : 1 + (nElemNodes{1}(ex)-1));
                     yIndex = (1 : 1 + (nElemNodes{2}(ey)-1));
