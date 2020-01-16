@@ -1,5 +1,6 @@
-function SS = buildElementBoundaryMap(nElemNodes)
-nDimensions = length(nElemNodes);
+function SS = buildElementBoundaryMap(eDegree)
+nElemNodes = eDegree + 1;
+nDimensions = length(eDegree);
 
 if nDimensions == 1
     SS = cell(2,1);
