@@ -58,7 +58,7 @@ elseif nDimensions == 3
     for ez = 1:NZ
         for ey = 1:NY
             for ex = 1:NX
-                                e = (ez-1)*NY*NX + (ey-1)*NX + ex;
+                e = (ez-1)*NY*NX + (ey-1)*NX + ex;
                 eDegree(:,e) = [nElemNodes{1}(ex); nElemNodes{2}(ey); nElemNodes{3}(ez)] - 1;
                 if ex == 1 && ey == 1 && ez == 1
                     xIndex = (1 : 1 + (nElemNodes{1}(ex)-1));
