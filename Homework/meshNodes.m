@@ -1,22 +1,19 @@
 function varargout = meshNodes(eDomains,nElemNodes)
-if iscell(eDomains) == true
     nDimensions = length(eDomains);
-else
     nDimensions = 1;
-end
 
 if nDimensions == 1
-    nElem = length(nElemNodes);
-    nNodes = (nElem+1) + sum(nElemNodes-2);
+    nElem = length(nElemNodes{1});
+    nNodes = (nElem+1) + sum(nElemNodes{1}-2);
     x = zeros(nNodes,1);
     for e = 1:nElem
         if e == 1
-            nodeIDs = 1:nElemNodes(e);
+            nodeIDs = 1:nElemNodes{1}(e);
         else
-            nodeIDs = nodeIDs(end):(nodeIDs(end)+(nElemNodes(e)-1));
+            nodeIDs = nodeIDs(end):(nodeIDs(end)+(nElemNodes{1}(e)-1));
         end
 
-        x(nodeIDs) = linspace(eDomains(e),eDomains(e+1),nElemNodes(e));
+        x(nodeIDs) = linspace(eDomains{1}(e),eDomains{1}(e+1),nElemNodes{1}(e));
     end
     varargout{1} = x;
 elseif nDimensions == 2

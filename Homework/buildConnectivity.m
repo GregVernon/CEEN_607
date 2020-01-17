@@ -1,23 +1,18 @@
 function [eCONN,eDegree] = buildConnectivity(nElemNodes)
-if iscell(nElemNodes) == true
-    nDimensions = length(nElemNodes);
-    nElem = cellfun(@length,nElemNodes);
-else
-    nDimensions = 1;
-    nElem = length(nElemNodes);
-end
+nDimensions = length(nElemNodes);
+nElem = cellfun(@length,nElemNodes);
 
 eDegree = zeros(nDimensions,prod(nElem));
 if nDimensions == 1
-    eCONN = nan(max(nElemNodes),nElem);
+    eCONN = nan(max(nElemNodes{1}),nElem);
     for e = 1:nElem
-        eDegree(1,e) = nElemNodes(e)-1;
+        eDegree(1,e) = nElemNodes{1}(e)-1;
         if e == 1
-            nodeIDs = 1:nElemNodes(e);
+            nodeIDs = 1:nElemNodes{1}(e);
         else
-            nodeIDs = nodeIDs(end):(nodeIDs(end)+(nElemNodes(e)-1));
+            nodeIDs = nodeIDs(end):(nodeIDs(end)+(nElemNodes{1}(e)-1));
         end
-        eCONN(1:nElemNodes(e),e) = nodeIDs;
+        eCONN(1:nElemNodes{1}(e),e) = nodeIDs;
     end
 elseif nDimensions == 2
     nTotElem = prod(nElem);
