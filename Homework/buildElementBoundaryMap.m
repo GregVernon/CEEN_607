@@ -11,19 +11,19 @@ elseif nDimensions == 2
     NX = nElemNodes(1);
     NY = nElemNodes(2);
     nodeID = 0;
-    for jj = 1:NY
-        for ii = 1:NX
+    for nj = 1:NY
+        for ni = 1:NX
             nodeID = nodeID + 1;
-            if ii == 1
+            if ni == 1
                 SS{1} = [SS{1}; nodeID];
             end
-            if ii == NX
+            if ni == NX
                 SS{2} = [SS{2}; nodeID];
             end
-            if jj == 1
+            if nj == 1
                 SS{3} = [SS{3}; nodeID];
             end
-            if jj == NY
+            if nj == NY
                 SS{4} = [SS{4}; nodeID];
             end
         end
@@ -35,26 +35,26 @@ elseif nDimensions == 3
     NY = nElemNodes(2);
     NZ = nElemNodes(3);
     nodeID = 0;
-    for kk = 1:NZ
-        for jj = 1:NY
-            for ii = 1:NX
+    for nk = 1:NZ
+        for nj = 1:NY
+            for ni = 1:NX
                 nodeID = nodeID + 1;
-                if ii == 1
+                if ni == 1
                     SS{1} = [SS{1}; nodeID];
                 end
-                if ii == NX
+                if ni == NX
                     SS{2} = [SS{2}; nodeID];
                 end
-                if jj == 1
+                if nj == 1
                     SS{3} = [SS{3}; nodeID];
                 end
-                if jj == NY
+                if nj == NY
                     SS{4} = [SS{4}; nodeID];
                 end
-                if kk == 1
+                if nk == 1
                     SS{5} = [SS{5}; nodeID];
                 end
-                if kk == NZ
+                if nk == NZ
                     SS{6} = [SS{6}; nodeID];
                 end
             end
