@@ -1,6 +1,5 @@
 function varargout = meshNodes(eDomains,nElemNodes)
-    nDimensions = length(eDomains);
-    nDimensions = 1;
+nDimensions = length(eDomains);
 
 if nDimensions == 1
     nElem = length(nElemNodes{1});
@@ -12,14 +11,14 @@ if nDimensions == 1
         else
             nodeIDs = nodeIDs(end):(nodeIDs(end)+(nElemNodes{1}(e)-1));
         end
-
+        
         x(nodeIDs) = linspace(eDomains{1}(e),eDomains{1}(e+1),nElemNodes{1}(e));
     end
     varargout{1} = x;
 elseif nDimensions == 2
-    x = meshNodes(eDomains{1},nElemNodes{1});
-    y = meshNodes(eDomains{2},nElemNodes{2});
-
+    x = meshNodes(eDomains(1),nElemNodes(1));
+    y = meshNodes(eDomains(2),nElemNodes(2));
+    
     XX = zeros(length(x)*length(y),1);
     YY = zeros(length(x)*length(y),1);
     for jj = 1:length(y)
@@ -33,10 +32,10 @@ elseif nDimensions == 2
     varargout{2} = YY;
     
 elseif nDimensions == 3
-    x = meshNodes(eDomains{1},nElemNodes{1});
-    y = meshNodes(eDomains{2},nElemNodes{2});
-    z = meshNodes(eDomains{3},nElemNodes{3});
-
+    x = meshNodes(eDomains(1),nElemNodes(1));
+    y = meshNodes(eDomains(2),nElemNodes(2));
+    z = meshNodes(eDomains(3),nElemNodes(3));
+    
     XXX = zeros(length(x)*length(y)*length(z),1);
     YYY = zeros(length(x)*length(y)*length(z),1);
     ZZZ = zeros(length(x)*length(y)*length(z),1);
