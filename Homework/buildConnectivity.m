@@ -31,9 +31,9 @@ elseif nDimensions == 2
     NY = nElem(2);
     for ey = 1:NY
         for ex = 1:NX
-            e = (ey-1)*NY + ex;
+            e = (ey-1)*NX + ex;
             eDegree(:,e) = [nElemNodes{1}(ex); nElemNodes{2}(ey)] - 1;
-            if e == 1
+            if ex == 1 && ey == 1
                 xIndex = (1 : 1 + (nElemNodes{1}(ex)-1));
                 yIndex = (1 : 1 + (nElemNodes{2}(ey)-1));
             elseif ex == 1
@@ -63,7 +63,7 @@ elseif nDimensions == 3
     for ez = 1:NZ
         for ey = 1:NY
             for ex = 1:NX
-                e = (ez-1)*NY*NX + (ey-1)*NY + ex;
+                                e = (ez-1)*NY*NX + (ey-1)*NX + ex;
                 eDegree(:,e) = [nElemNodes{1}(ex); nElemNodes{2}(ey); nElemNodes{3}(ez)] - 1;
                 if ex == 1 && ey == 1 && ez == 1
                     xIndex = (1 : 1 + (nElemNodes{1}(ex)-1));
@@ -72,7 +72,7 @@ elseif nDimensions == 3
                 elseif ex == 1 && ey == 1
                     xIndex = (1 : 1 + (nElemNodes{1}(ex)-1));
                     yIndex = (1 : 1 + (nElemNodes{2}(ey)-1));
-                    zIndex = ((ez-1)+1) + sum(nElemNodes{1}(1:ex-1)-2) + sum(nElemNodes{2}(1:ey-1)-2);
+                    zIndex = ((ez-1)+1) + sum(nElemNodes{3}(1:ez-1)-2);
                     zIndex = (zIndex(end) : (zIndex(end) + (nElemNodes{3}(ez)-1)));
                 elseif ex == 1
                     xIndex = (1 : 1 + (nElemNodes{1}(ex)-1));
