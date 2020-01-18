@@ -72,8 +72,9 @@ function importGenomat(filename)
     NODES = setParentElement(ELEMS,NODES)
 
     # Backfill node boundary information for each element
+    ELEMS = setElementNodeTypes(ELEMS,NODES)
 
-
+    
     return ELEMS, NODES
 
 end
@@ -153,6 +154,8 @@ function setElementNodeTypes(ELEMS,NODES)
             end
         end
     end
+    
+    return ELEMS
 end
 
 end
