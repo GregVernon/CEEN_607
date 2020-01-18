@@ -49,7 +49,7 @@ function initElements(G)
             ELEMS[e].Dimension = Dimension
             ELEMS[e].Degree = ones(Int8, Dimension)
             ELEMS[e].ElementFamily = elem_type
-            ELEMS[e].ChildNodes = [G[blk_name][E2G_nodeOrder,e]...]
+            ELEMS[e].ChildNodes = G[blk_name].var[E2G_nodeOrder,e]
             ELEMS[e].GlobalID = e
             ELEMS[e].ParentBlocks = b
             ELEMS[e].NumNodes = length(ELEMS[e].ChildNodes)
@@ -78,16 +78,16 @@ function initNodes(G,ELEMS)
         NODES[n].isElementInternalNode = false
         # Load Nodal Positions
         if num_dim == 1
-            coordx = [G["coordx"]...]
+            coordx = G["coordx"].var[n]
             NODES[n].Coordinates = coordx
         elseif num_dim == 2
-            coordx = [G["coordx"]...]
-            coordy = [G["coordy"]...]
+            coordx = G["coordx"].var[n]
+            coordy = G["coordy"].var[n]
             NODES[n].Coordinates = [coordx coordy]
         elseif num_dim == 3
-            coordx = [G["coordx"]...]
-            coordy = [G["coordy"]...]
-            coordz = [G["coordz"]...]
+            coordx = G["coordx"].var[n]
+            coordy = G["coordy"].var[n]
+            coordz = G["coordz"].var[n]
             NODES[n].Coordinates = [coordx coordy coordz]
         end
     end
