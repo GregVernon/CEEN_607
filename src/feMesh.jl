@@ -40,11 +40,11 @@ function initElements(G)
         blk_name = join(["connect" string(b)])
         # Determine Dimensionality of the Elements
         elem_type = G[blk_name].attrib["elem_type"]
+        referenceElement = feDatastruct.makeExodusElement(elem_type)
+        E2G_nodeOrder = referenceElement.ElementNodeOrder
         Dimension = getDimension(elem_type)
         for blk_e = 1:num_elem
             e+=1
-            referenceElement = feDatastruct.makeExodusElement(elem_type)
-            E2G_nodeOrder = referenceElement.ElementNodeOrder
             ELEMS[e] = feDatastruct.feElement()
             ELEMS[e].Dimension = Dimension
             ELEMS[e].Degree = ones(Int8, Dimension)
