@@ -9,6 +9,22 @@ export importGenomat
 function importGenomat(filename)
     G = NCDatasets.Dataset(filename,"r")
 
+    ELEMS = initElements(G)
+    NODES = initNodes(G,ELEMS)
+
+    return ELEMS, NODES
+end
+
+mutable struct Genomat
+    num_dim
+    num_nodes
+    num_elem
+    num_el_blk
+    num_node_sets
+    num_side_sets
+end
+
+function initElements(G)
     # Get global information about the Genesis file
     num_dim       = G.dim["num_dim"]
     num_nodes     = G.dim["num_nodes"]
@@ -16,7 +32,7 @@ function importGenomat(filename)
     num_el_blk    = G.dim["num_el_blk"]
     num_node_sets = G.dim["num_node_sets"]
     num_side_sets = G.dim["num_side_sets"]
-    
+
     # Create the Elements
     ELEMS = Array{Any,1}(undef, num_elem)
     e = 0
@@ -39,29 +55,40 @@ function importGenomat(filename)
             ELEMS[e].NumNodes = length(ELEMS[e].ChildNodes)
         end
     end
+    return ELEMS
+end
 
+function initNodes(G,ELEMS)
+    # Get global information about the Genesis file
+    num_dim       = G.dim["num_dim"]
+    num_nodes     = G.dim["num_nodes"]
+    num_elem      = G.dim["num_elem"]
+    num_el_blk    = G.dim["num_el_blk"]
+    num_node_sets = G.dim["num_node_sets"]
+    num_side_sets = G.dim["num_side_sets"]
+    
     # Create the Nodes
     NODES = Array{Any,1}(undef,num_nodes)
     for n = 1:num_nodes
         NODES[n] = feDatastruct.feNode()
         # A Genomat mesh is linear only
-        NODES[n].isElementBoundaryNode = fill(true)
-        NODES[n].isElementCornerNode = fill(true)
-        NODES[n].isElementFaceNode = fill(true)
-        NODES[n].isElementInternalNode = fill(false)
+        NODES[n].isElementBoundaryNode = true
+        NODES[n].isElementCornerNode = true
+        NODES[n].isElementFaceNode = true
+        NODES[n].isElementInternalNode = false
         # Load Nodal Positions
         if num_dim == 1
-            coordx = G["coordx"]
-            NODES[n].Coordinates = coordx[:]
+            coordx = [G["coordx"]...]
+            NODES[n].Coordinates = coordx
         elseif num_dim == 2
-            coordx = G["coordx"]
-            coordy = G["coordy"]
-            NODES[n].Coordinates = [coordx[:] coordy[:]]
+            coordx = [G["coordx"]...]
+            coordy = [G["coordy"]...]
+            NODES[n].Coordinates = [coordx coordy]
         elseif num_dim == 3
-            coordx = G["coordx"]
-            coordy = G["coordy"]
-            coordz = G["coordz"]
-            NODES[n].Coordinates = [coordx[:] coordy[:] coordz[:]]
+            coordx = [G["coordx"]...]
+            coordy = [G["coordy"]...]
+            coordz = [G["coordz"]...]
+            NODES[n].Coordinates = [coordx coordy coordz]
         end
     end
 
@@ -74,19 +101,9 @@ function importGenomat(filename)
     # Backfill node boundary information for each element
     ELEMS = setElementNodeTypes(ELEMS,NODES)
 
-    
-    return ELEMS, NODES
-
+    return ELEMS,NODES
 end
 
-mutable struct Genomat
-    num_dim
-    num_nodes
-    num_elem
-    num_el_blk
-    num_node_sets
-    num_side_sets
-end
 
 function getDimension(elem_type::String)
     ETYPE_1D = ["BAR2"]
@@ -138,6 +155,9 @@ function setElementNodeTypes(ELEMS,NODES)
     for e = 1:num_elem
         num_nodes = length(ELEMS[e].ChildNodes)
         ELEMS[e].BoundaryNodes = zeros(Int64,num_nodes)
+        ELEMS[e].CornerNodes = zeros(Int64,num_nodes)
+        ELEMS[e].FaceNodes = zeros(Int64,num_nodes)
+        ELEMS[e].InternalNodes = zeros(Int64,num_nodes)
         for n = 1:num_nodes
             gnID = ELEMS[e].ChildNodes[n]
             if NODES[gnID].isElementBoundaryNode
