@@ -2,6 +2,15 @@ module feDatastruct
 
 export feElement, feNode
 
+mutable struct feMesh
+    Elements # DONE
+    Nodes # DONE
+    ElementSets
+    SurfaceSets
+    NodeSets
+end
+
+
 mutable struct feElement
     Basis
     BoundaryNodes # DONE
@@ -33,6 +42,18 @@ mutable struct feNode
     isMeshInternalNode
     ChildDOFS # DONE
     feNode() = new()
+end
+
+mutable struct feElementSet
+    ChildElements
+end
+
+mutable struct feSurfaceSet
+    Child
+end
+
+mutable struct feNodeSet
+    ChildNodes
 end
 
 mutable struct Quadrature
@@ -75,13 +96,14 @@ function makeExodusElement(elem_type)
 
     if elem_type == "HEX8"
         ElementNodeOrder = [1 2 4 3 5 6 8 7]
-        FaceNodeOrder = [[1 5 8 4], [2 3 7 6], [1 2 6 5], [3 4 8 7], [1 4 3 2],[5 6 7 8]]
+        ElementFaceOrder = [4 2 1 3 5 6]
+        FaceNodeOrder = [[1 2 6 5],[2 4 8 6],[4 3 7 8],[1 5 7 3],[1 3 4 2],[5 6 8 7],[],[]]
         isBoundaryNode = fill(true,8)
         isCornerNode = fill(true,8)
         isFaceNode = fill(true,8)
         isInternalNode = fill(false,8)
     end
-    GE = ExodusElement(ElementType,ElementNodeOrder,FaceNodeOrder,EdgeNodeOrder,isBoundaryNode,isCornerNode,isFaceNode,isInternalNode)
+    GE = ExodusElement(ElementType,ElementNodeOrder,ElementFaceOrder,FaceNodeOrder,isBoundaryNode,isCornerNode,isFaceNode,isInternalNode)
     return GE
 end
 
