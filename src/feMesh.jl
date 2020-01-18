@@ -34,7 +34,7 @@ function initElements(G)
     num_side_sets = G.dim["num_side_sets"]
 
     # Create the Elements
-    ELEMS = Array{Any,1}(undef, num_elem)
+    ELEMS = Array{feMesh.feDatastruct.feElement,1}(undef, num_elem)
     e = 0
     for b = 1:num_el_blk
         blk_name = join(["connect" string(b)])
@@ -68,7 +68,7 @@ function initNodes(G,ELEMS)
     num_side_sets = G.dim["num_side_sets"]
     
     # Create the Nodes
-    NODES = Array{Any,1}(undef,num_nodes)
+    NODES = Array{feMesh.feDatastruct.feNode,1}(undef,num_nodes)
     for n = 1:num_nodes
         NODES[n] = feDatastruct.feNode()
         # A Genomat mesh is linear only
