@@ -46,14 +46,19 @@ end
 
 mutable struct feElementSet
     ChildElements
+    feElementSet() = new()
 end
 
 mutable struct feSurfaceSet
-    Child
+    ChildElements
+    ChildElements_LocalFace
+    ChildNodes
+    feSurfaceSet() = new()
 end
 
 mutable struct feNodeSet
     ChildNodes
+    feNodeSet() = new()
 end
 
 mutable struct Quadrature
