@@ -9,10 +9,21 @@ export importGenomat
 function importGenomat(filename)
     G = NCDatasets.Dataset(filename,"r")
 
+    # Get global information about the Genesis file
+    num_dim       = G.dim["num_dim"]
+    num_nodes     = G.dim["num_nodes"]
+    num_elem      = G.dim["num_elem"]
+    num_el_blk    = G.dim["num_el_blk"]
+    num_node_sets = G.dim["num_node_sets"]
+    num_side_sets = G.dim["num_side_sets"]
+    
     ELEMS = initElements(G)
     ELEMS,NODES = initNodes(G,ELEMS)
-
-    return ELEMS, NODES
+    
+    NS = initNodeSets(G)
+    SS = initSurfaceSets(G,ELEMS)
+    
+    return ELEMS, NODES,  NS, SS
 end
 
 mutable struct Genomat
@@ -22,6 +33,54 @@ mutable struct Genomat
     num_el_blk
     num_node_sets
     num_side_sets
+end
+
+function initSurfaceSets(G,ELEMS)
+    # Get global information about the Genesis file
+    num_dim       = G.dim["num_dim"]
+    num_nodes     = G.dim["num_nodes"]
+    num_elem      = G.dim["num_elem"]
+    num_el_blk    = G.dim["num_el_blk"]
+    num_node_sets = G.dim["num_node_sets"]
+    num_side_sets = G.dim["num_side_sets"]
+    
+    SS = [feDatastruct.feSurfaceSet() for s = 1:num_side_sets]
+    for s = 1:num_side_sets
+        es_name = join(["elem_ss" string(s)])
+        ss_name = join(["side_ss" string(s)])
+        SS[s].ChildElements = G[es_name].var[:]
+        SS[s].ChildElements_LocalFace = G[ss_name].var[:]
+        SS[s].ChildNodes = Int64[]
+        for e = 1:length(SS[s].ChildElements)
+            geID = SS[s].ChildElements[e]
+            elem_type = ELEMS[geID].ElementFamily
+            locFaceID = SS[s].ChildElements_LocalFace[e]
+            R = feDatastruct.makeExodusElement(elem_type)
+            locNodeID = R.FaceNodeOrder[R.ElementFaceOrder[locFaceID]] # FIXME
+            append!(SS[s].ChildNodes, ELEMS[geID].ChildNodes[locNodeID])
+        end
+        unique!(SS[s].ChildNodes)
+    end
+
+    return SS
+end
+
+function initNodeSets(G)
+    # Get global information about the Genesis file
+    num_dim       = G.dim["num_dim"]
+    num_nodes     = G.dim["num_nodes"]
+    num_elem      = G.dim["num_elem"]
+    num_el_blk    = G.dim["num_el_blk"]
+    num_node_sets = G.dim["num_node_sets"]
+    num_side_sets = G.dim["num_side_sets"]
+     
+    NS = [feDatastruct.feNodeSet() for n = 1:num_node_sets]
+    for n = 1:num_node_sets
+        ns_name = join(["node_ns" string(n)])
+        NS[n].ChildNodes = G[ns_name].var[:]
+    end
+
+    return NS
 end
 
 function initElements(G)
