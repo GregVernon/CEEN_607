@@ -65,9 +65,9 @@ end
 
 struct ExodusElement
     ElementType # DONE
+    ElementFaceOrder # DONE
     ElementNodeOrder # DONE
     FaceNodeOrder # DONE
-    EdgeNodeOrder # DONE
     isBoundaryNode # DONE
     isCornerNode # DONE
     isFaceNode # DONE
@@ -78,6 +78,7 @@ function makeExodusElement(elem_type)
     ElementType = elem_type
     if elem_type == "BAR2"
         ElementNodeOrder = [1 2]
+        ElementFaceOrder = [1]
         FaceNodeOrder = [[1 2]]
         isBoundaryNode = fill(true,2)
         isCornerNode = fill(true,2)
@@ -87,6 +88,7 @@ function makeExodusElement(elem_type)
 
     if elem_type == "QUAD4"
         ElementNodeOrder = [1 2 4 3]
+        ElementFaceOrder = [1]
         FaceNodeOrder = [[1 2 4 3]]
         isBoundaryNode = fill(true,4)
         isCornerNode = fill(true,4)
@@ -97,13 +99,13 @@ function makeExodusElement(elem_type)
     if elem_type == "HEX8"
         ElementNodeOrder = [1 2 4 3 5 6 8 7]
         ElementFaceOrder = [4 2 1 3 5 6]
-        FaceNodeOrder = [[1 2 6 5],[2 4 8 6],[4 3 7 8],[1 5 7 3],[1 3 4 2],[5 6 8 7],[],[]]
+        FaceNodeOrder = [[1 2 6 5],[2 4 8 6],[4 3 7 8],[1 5 7 3],[1 3 4 2],[5 6 8 7]]
         isBoundaryNode = fill(true,8)
         isCornerNode = fill(true,8)
         isFaceNode = fill(true,8)
         isInternalNode = fill(false,8)
     end
-    GE = ExodusElement(ElementType,ElementNodeOrder,ElementFaceOrder,FaceNodeOrder,isBoundaryNode,isCornerNode,isFaceNode,isInternalNode)
+    GE = ExodusElement(ElementType,ElementFaceOrder,ElementNodeOrder,FaceNodeOrder,isBoundaryNode,isCornerNode,isFaceNode,isInternalNode)
     return GE
 end
 
