@@ -79,6 +79,27 @@ function buildGlobalNodeCoordinateArray(G)
     
     return NodeCoords
 end
+
+function buildGlobalElementNodalConnectivityArray(ELEMS)
+    num_elems = length(ELEMS)
+    # Find max number of nodes in the elements
+    max_loc_nodes = 0
+    for e = 1:num_elems
+        num_loc_nodes = ELEMS[e].NumNodes
+        if num_loc_nodes > max_loc_nodes
+            max_loc_nodes = ELEMS[e].NumNodes
+        end
+    end
+
+    ElemConnect = fill(-1,max_loc_nodes,num_elems)
+    for e = 1:num_elems
+        num_loc_nodes = ELEMS[e].NumNodes
+        ElemConnect[1:num_loc_nodes,e] = ELEMS[e].ChildNodes
+    end
+
+    return ElemConnect
+end
+
 function initNodes(G,ELEMS)
     # Get global information about the Genesis file
     num_dim       = G.dim["num_dim"]
