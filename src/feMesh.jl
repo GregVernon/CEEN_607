@@ -58,6 +58,27 @@ function initElements(G)
     return ELEMS
 end
 
+function buildGlobalNodeCoordinateArray(G)
+    # Get global information about the Genesis file
+    num_dim       = G.dim["num_dim"]
+    num_nodes     = G.dim["num_nodes"]
+    # Load Nodal Positions
+    if num_dim == 1
+        coordx = G["coordx"].var[:]
+        NodeCoords = coordx
+    elseif num_dim == 2
+        coordx = G["coordx"].var[:]
+        coordy = G["coordy"].var[:]
+        NodeCoords = [coordx coordy]
+    elseif num_dim == 3
+        coordx = G["coordx"].var[:]
+        coordy = G["coordy"].var[:]
+        coordz = G["coordz"].var[:]
+        NodeCoords = [coordx coordy coordz]
+    end
+    
+    return NodeCoords
+end
 function initNodes(G,ELEMS)
     # Get global information about the Genesis file
     num_dim       = G.dim["num_dim"]
