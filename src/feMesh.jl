@@ -10,7 +10,7 @@ function importGenomat(filename)
     G = NCDatasets.Dataset(filename,"r")
 
     ELEMS = initElements(G)
-    NODES = initNodes(G,ELEMS)
+    ELEMS,NODES = initNodes(G,ELEMS)
 
     return ELEMS, NODES
 end
