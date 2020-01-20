@@ -160,6 +160,30 @@ function buildGlobalElementNodalConnectivityArray(ELEMS)
     return ElemConnect
 end
 
+function buildNodeGlobalDOFConnectivityArray(NODES)
+    num_nodes = length(NODES)
+    # Find max number of dofs in the nodes
+    max_num_dofs = 0
+    for n = 1:num_nodes
+        nodeLocalDOFS = NODES[n].ChildDOFS
+        num_local_dofs = length(nodeLocalDOFS)
+        if num_local_dofs > max_num_dofs
+            max_num_dofs = num_local_dofs
+        end
+    end
+
+    # Populate the array
+    NodeConnect = fill(-1,max_num_dofs,num_nodes)
+    for n = 1:num_nodes
+        nodeLocalDOFS = NODES[n].ChildDOFS
+        num_local_dofs = length(nodeLocalDOFS)
+        for ldof = 1:num_local_dofs
+            NodeConnect[ldof,n] = nodeLocalDOFS[ldof]
+        end
+    end
+    return NodeConnect
+end
+
 function initNodes(G,ELEMS)
     # Get global information about the Genesis file
     num_dim       = G.dim["num_dim"]
