@@ -102,13 +102,14 @@ function initElements(G)
         referenceElement = feDatastruct.makeExodusElement(elem_type)
         E2G_nodeOrder = referenceElement.ElementNodeOrder
         Dimension = getDimension(elem_type)
-        for blk_e = 1:num_elem
+        num_elem_in_block = size(G[blk_name].var[:],2)
+        for blk_e = 1:num_elem_in_block
             e+=1
             # ELEMS[e] = feDatastruct.feElement()
             ELEMS[e].Dimension = Dimension
             ELEMS[e].Degree = ones(Int8, Dimension)
             ELEMS[e].ElementFamily = elem_type
-            ELEMS[e].ChildNodes = G[blk_name].var[E2G_nodeOrder,e]
+            ELEMS[e].ChildNodes = G[blk_name].var[E2G_nodeOrder,blk_e]
             ELEMS[e].GlobalID = e
             ELEMS[e].ParentBlocks = b
             ELEMS[e].NumNodes = length(ELEMS[e].ChildNodes)
