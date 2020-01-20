@@ -56,7 +56,7 @@ function initSurfaceSets(G,ELEMS)
             elem_type = ELEMS[geID].ElementFamily
             locFaceID = SS[s].ChildElements_LocalFace[e]
             R = feDatastruct.makeExodusElement(elem_type)
-            locNodeID = R.FaceNodeOrder[R.ElementFaceOrder[locFaceID]] # FIXME
+            locNodeID = R.FaceNodeOrder[locFaceID]
             append!(SS[s].ChildNodes, ELEMS[geID].ChildNodes[locNodeID])
         end
         unique!(SS[s].ChildNodes)
