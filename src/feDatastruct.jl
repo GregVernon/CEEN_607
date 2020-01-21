@@ -58,6 +58,7 @@ end
 
 mutable struct feNodeSet
     ChildNodes
+    ConstrainedDOF
     feNodeSet() = new()
 end
 

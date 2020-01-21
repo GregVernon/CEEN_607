@@ -184,6 +184,24 @@ function buildNodeGlobalDOFConnectivityArray(NODES)
     return NodeConnect
 end
 
+function buildConstrainedDOFList(NODES, NS::Array{feDatastruct.feNodeSet,1})
+    NodeConnect = buildNodeGlobalDOFConnectivityArray(NODES)
+    num_gdof = max(NodeConnect...)
+    isConstrainedGDOF = fill(false,num_gdof)
+    num_nodesets = length(NS)
+    for i = 1:num_nodesets
+        constrained_ldof = NS[i].ConstrainedDOF
+        num_ns_nodes = length(NS[i].ChildNodes)
+        for n = 1:num_ns_nodes
+            for ldof = 1:length(constrained_ldof)
+                isConstrainedGDOF[NodeConnect[constrained_ldof,NS[i].ChildNodes[n]]] = true
+            end
+        end
+    end
+
+    return isConstrainedGDOF
+end
+
 function initNodes(G,ELEMS)
     # Get global information about the Genesis file
     num_dim       = G.dim["num_dim"]
