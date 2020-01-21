@@ -46,6 +46,7 @@ end
 
 mutable struct feElementSet
     ChildElements
+    Name
     feElementSet() = new()
 end
 
@@ -53,12 +54,14 @@ mutable struct feSurfaceSet
     ChildElements
     ChildElements_LocalFace
     ChildNodes
+    Name
     feSurfaceSet() = new()
 end
 
 mutable struct feNodeSet
     ChildNodes
     ConstrainedDOF
+    Name
     feNodeSet() = new()
 end
 

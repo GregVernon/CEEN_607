@@ -62,6 +62,16 @@ function initSurfaceSets(G,ELEMS)
         unique!(SS[s].ChildNodes)
     end
 
+    if "ss_names" in keys(G)
+        # Get the names of the surfacesets
+        ss_names = G["ss_names"].var[:]
+        for n = 1:num_side_sets
+            ss_name = ss_names[:,n]
+            ss_name[ss_name .!= '\0']
+            SS[n].Name = ss_name
+        end
+    end
+
     return SS
 end
 
@@ -78,6 +88,16 @@ function initNodeSets(G)
     for n = 1:num_node_sets
         ns_name = join(["node_ns" string(n)])
         NS[n].ChildNodes = G[ns_name].var[:]
+    end
+
+    if "ns_names" in keys(G)
+        # Get the names of the nodesets
+        ns_names = G["ns_names"].var[:]
+        for n = 1:num_node_sets
+            ns_name = ns_names[:,n]
+            ns_name[ns_name .!= '\0']
+            NS[n].Name = ns_name
+        end
     end
 
     return NS
