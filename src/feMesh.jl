@@ -1,5 +1,8 @@
 module feMesh
 
+include("feDatastruct.jl")
+import .feDatastruct
+
 function buildGlobalNodeCoordinateArray(G)
     # Get global information about the Genesis file
     num_dim       = G.dim["num_dim"]
@@ -76,7 +79,8 @@ function buildConstrainedDOFList(NODES, NS::Array{feDatastruct.feNodeSet,1})
         num_ns_nodes = length(NS[i].ChildNodes)
         for n = 1:num_ns_nodes
             for ldof = 1:length(constrained_ldof)
-                isConstrainedGDOF[NodeConnect[constrained_ldof,NS[i].ChildNodes[n]]] = true
+                gdofID = NodeConnect[constrained_ldof,NS[i].ChildNodes[n]]
+                isConstrainedGDOF[gdofID] = true
             end
         end
     end
