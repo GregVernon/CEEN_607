@@ -25,16 +25,20 @@ function importGenomat(filename)
     NS = initNodeSets(G)
     SS = initSurfaceSets(G,ELEMS)
     
-    return ELEMS, NODES,  NS, SS
+    GEOM = MESH()
+    GEOM.Elements = ELEMS
+    GEOM.Nodes = NODES
+    GEOM.NodeSets = NS
+    GEOM.SurfaceSets = SS
+    return GEOM
 end
 
-mutable struct Genomat
-    num_dim
-    num_nodes
-    num_elem
-    num_el_blk
-    num_node_sets
-    num_side_sets
+mutable struct MESH  
+    Elements
+    Nodes
+    NodeSets
+    SurfaceSets
+    MESH() = new()
 end
 
 function initSurfaceSets(G,ELEMS)
