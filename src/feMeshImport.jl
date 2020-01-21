@@ -1,4 +1,4 @@
-module feMesh
+module feMeshImport
 
 import NCDatasets
 include("feDatastruct.jl")
