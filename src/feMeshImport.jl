@@ -69,7 +69,7 @@ function initSurfaceSets(G,ELEMS)
         ss_names = G["ss_names"].var[:]
         for n = 1:num_side_sets
             ss_name = ss_names[:,n]
-            ss_name[ss_name .!= '\0']
+            ss_name = join(ss_name[ss_name .!= '\0'])
             SS[n].Name = ss_name
         end
     end
@@ -97,7 +97,7 @@ function initNodeSets(G)
         ns_names = G["ns_names"].var[:]
         for n = 1:num_node_sets
             ns_name = ns_names[:,n]
-            ns_name[ns_name .!= '\0']
+            ns_name = join(ns_name[ns_name .!= '\0'])
             NS[n].Name = ns_name
         end
     end
