@@ -2,7 +2,9 @@ module feMeshImport
 
 import NCDatasets
 include("feDatastruct.jl")
+include("feMesh.jl")
 import .feDatastruct
+import .feMesh
 
 export importGenomat
 
@@ -121,7 +123,7 @@ function initElements(G)
         elem_type = G[blk_name].attrib["elem_type"]
         referenceElement = feDatastruct.makeExodusElement(elem_type)
         E2G_nodeOrder = referenceElement.ElementNodeOrder
-        Dimension = getDimension(elem_type)
+        Dimension = feMesh.getDimension(elem_type)
         num_elem_in_block = size(G[blk_name].var[:],2)
         for blk_e = 1:num_elem_in_block
             e+=1
@@ -172,89 +174,15 @@ function initNodes(G,ELEMS)
     end
 
     # Assign global DOF ID to each node
-    NODES = assignNodeDOFS(NODES,num_dim)
+    NODES = feMesh.assignNodeDOFS(NODES,num_dim)
 
     # Get parent element ID for each node
-    NODES = setParentElement(ELEMS,NODES)
+    NODES = feMesh.setParentElement(ELEMS,NODES)
 
     # Backfill node boundary information for each element
-    ELEMS = setElementNodeTypes(ELEMS,NODES)
+    ELEMS = feMesh.setElementNodeTypes(ELEMS,NODES)
 
     return ELEMS,NODES
-end
-
-
-function getDimension(elem_type::String)
-    ETYPE_1D = ["BAR2"]
-    ETYPE_2D = ["TRI3","QUAD4"]
-    ETYPE_3D = ["TETRA4","PYRAMID5","WEDGE6","HEX8"]
-    if      elem_type in ETYPE_1D
-        Dimension = 1
-    elseif  elem_type in ETYPE_2D
-        Dimension = 2
-    elseif  elem_type in ETYPE_3D
-        Dimension = 3
-    end
-    return Dimension
-end
-
-function assignNodeDOFS(NODES, num_dim)
-    dofID = 0
-    for n = 1:length(NODES)
-        NODES[n].ChildDOFS = zeros(Int64,num_dim)
-        for d = 1:num_dim
-            dofID+=1
-            NODES[n].ChildDOFS[d] = dofID
-        end
-    end
-    return NODES
-end
-
-function setParentElement(ELEMS,NODES)
-    num_nodes = length(NODES)
-    for n = 1:num_nodes
-        NODES[n].ParentElements = Int64[]
-    end
-
-    num_elem = length(ELEMS)
-    for e = 1:num_elem
-        num_nodes = length(ELEMS[e].ChildNodes)
-        for n = 1:num_nodes
-            gnID = ELEMS[e].ChildNodes[n]
-            if (e in NODES[gnID].ParentElements) == false
-                append!(NODES[gnID].ParentElements,e)
-            end
-        end
-    end
-    return NODES
-end
-
-function setElementNodeTypes(ELEMS,NODES)
-    num_elem = length(ELEMS)
-    for e = 1:num_elem
-        num_nodes = length(ELEMS[e].ChildNodes)
-        ELEMS[e].BoundaryNodes = zeros(Int64,num_nodes)
-        ELEMS[e].CornerNodes = zeros(Int64,num_nodes)
-        ELEMS[e].FaceNodes = zeros(Int64,num_nodes)
-        ELEMS[e].InternalNodes = zeros(Int64,num_nodes)
-        for n = 1:num_nodes
-            gnID = ELEMS[e].ChildNodes[n]
-            if NODES[gnID].isElementBoundaryNode
-                ELEMS[e].BoundaryNodes[n] = gnID
-            end
-            if NODES[gnID].isElementCornerNode
-                ELEMS[e].CornerNodes[n] = gnID
-            end
-            if NODES[gnID].isElementFaceNode
-                ELEMS[e].FaceNodes[n] = gnID
-            end
-            if NODES[gnID].isElementInternalNode
-                ELEMS[e].InternalNodes[n] = gnID
-            end
-        end
-    end
-    
-    return ELEMS
 end
 
 end
