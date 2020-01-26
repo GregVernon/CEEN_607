@@ -1,7 +1,13 @@
 module feMesh
 
 include("feDatastruct.jl")
-import .feDatastruct
+
+export buildGlobalNodeCoordinateArray
+export buildGlobalElementNodalConnectivityArray
+export buildNodeGlobalDOFConnectivityArray
+export buildConstrainedDOFList
+
+
 
 function buildGlobalNodeCoordinateArray(G)
     # Get global information about the Genesis file
