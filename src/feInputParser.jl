@@ -1,10 +1,16 @@
 module feInputParser
 
 include("feMeshImport.jl")
-import .feMeshImport
+include("feEnumerations.jl")
 
+export importInput
+export findInputCards
+export parseBoundaryCondition
+export parseLoadCondition
+export InputParams
 export BoundaryCondition
 export LoadCondition
+export BodyCondition
 
 function importInput(filename)
     fLines = readlines(filename)
@@ -68,6 +74,7 @@ function parseBoundaryCondition(Card)
     bc_type_index = findall(occursin.("type",Card))
     bc_type_line = Card[bc_type_index][1]
     bc_type = strip(split(bc_type_line,"=")[end])
+    bc_type = getproperty(feEnumerations,Symbol(bc_type))
     
     # Get BC Nodeset
     bc_ns_index = findall(occursin.("node set",Card))
@@ -100,6 +107,7 @@ function parseLoadCondition(Card)
     lc_type_index = findall(occursin.("type",Card))
     lc_type_line = Card[lc_type_index][1]
     lc_type = strip(split(lc_type_line,"=")[end])
+    lc_type = getproperty(feEnumerations,Symbol(lc_type))
     
     # Get LC Nodeset
     lc_ns_index = findall(occursin.("surface set",Card))
@@ -140,6 +148,13 @@ mutable struct LoadCondition
     SurfaceSetName
     Value
     LoadCondition() = new()
+end
+
+mutable struct BodyCondition
+    Type
+    ElementSetName
+    Value
+    BodyCondition() = new()
 end
 
 end
