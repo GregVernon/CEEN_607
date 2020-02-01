@@ -78,7 +78,7 @@ function buildNodeGlobalDOFConnectivityArray(NODES)
     return NodeConnect
 end
 
-function buildConstrainedDOFList(NODES, NS::Array{feDatastruct.feNodeSet,1})
+function buildConstrainedDOFList(NODES, NS)
     NodeConnect = buildNodeGlobalDOFConnectivityArray(NODES)
     num_gdof = max(NodeConnect...)
     isConstrainedGDOF = fill(false,num_gdof)
