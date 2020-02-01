@@ -1,6 +1,9 @@
 module feMesh
 
 include("feDatastruct.jl")
+include("feQuadrature.jl")
+import .feDatastruct
+import .feQuadrature
 
 export buildGlobalNodeCoordinateArray
 export buildGlobalElementNodalConnectivityArray
