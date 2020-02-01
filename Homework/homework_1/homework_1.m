@@ -9,9 +9,9 @@ eDomains = linspace(xMin,xMax,nElem+1);
 nElemNodes = eDegree+1;
 
 % Mesh the 1D nodes
-x = meshNodes_1D(eDomains,nElemNodes);
+x = meshNodes(eDomains,nElemNodes);
 % Build element-node connectivity
-eCONN = buildConnectivity_1D(nElemNodes);
+[eCONN,eDEGREE] = buildConnectivity(nElemNodes);
 
 plot(x,zeros(size(x)),'-o')
 disp(eCONN)
@@ -34,7 +34,7 @@ eDomains{2} = linspace(yMin,yMax,nElem{2}+1);
 nElemNodes{2} = eDegree{2}+1;
 
 % Mesh the 2D nodes
-[x,y] = meshNodes_2D(eDomains,nElemNodes);
+[x,y] = meshNodes(eDomains,nElemNodes);
 % figure
 % scatter(x,y,'filled')
 % hold on
@@ -45,7 +45,7 @@ nElemNodes{2} = eDegree{2}+1;
 % end
 
 % Build element connectivity
-eCONN = buildConnectivity_2D(nElemNodes);
+[eCONN, eDEGREE] = buildConnectivity(nElemNodes);
 
 % figure
 % hold on
@@ -83,10 +83,10 @@ eDomains{3} = linspace(zMin,zMax,nElem{3}+1);
 nElemNodes{3} = eDegree{3}+1;
 
 % Mesh the 3D nodes
-[x,y,z] = meshNodes_3D(eDomains,nElemNodes);
+[x,y,z] = meshNodes(eDomains,nElemNodes);
 
 % Build element connectivity
-eCONN = buildConnectivity_3D(nElemNodes);
+[eCONN, eDEGREE] = buildConnectivity(nElemNodes);
 
 figure
 scatter3(x,y,z,'filled')
