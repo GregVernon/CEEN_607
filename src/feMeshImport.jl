@@ -8,7 +8,7 @@ import .feMesh
 
 export importGenomat
 
-function importGenomat(filename)
+function importGenomat(filename,PARAMS)
     G = NCDatasets.Dataset(filename,"r")
 
     # Get global information about the Genesis file
@@ -22,7 +22,7 @@ function importGenomat(filename)
     ELEMS = initElements(G)
     ELEMS,NODES = initNodes(G,ELEMS)
     
-    NS = initNodeSets(G)
+    NS = initNodeSets(G,PARAMS)
     SS = initSurfaceSets(G,ELEMS)
     
     GEOM = MESH()
@@ -108,8 +108,8 @@ function initNodeSets(G,PARAMS)
         # Set the constrained DOF for the nodesets
         for n = 1:num_node_sets
             for m = 1:num_node_sets
-                if lowercase(NS[n].Name) == lowercase(PARAMS.NodeSets[m].NodeSetName)
-                    NS[n].ConstrainedDOF = PARAMS.NodeSets[m].DOF
+                if lowercase(NS[n].Name) == lowercase(PARAMS.BoundaryConditions[m].NodeSetName)
+                    NS[n].ConstrainedDOF = PARAMS.BoundaryConditions[m].DOF
                 end
             end
         end
