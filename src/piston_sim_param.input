@@ -1,0 +1,48 @@
+begin boundary condition
+	type = Dirichlet
+	node set = Bottom 
+	dof id = 1
+	value = 0.0
+end
+
+begin boundary condition
+	type = Dirichlet
+	node set = Bottom 
+	dof id = 2
+	value = 0.0
+end
+
+begin boundary condition
+	type = Dirichlet
+	node set = Bottom 
+	dof id = 3
+	value = 0.0
+end
+
+begin boundary condition
+	type = Dirichlet
+	node set = xMin 
+	dof id = 1
+	value = 0.0
+end
+
+geometry = piston_max_low.g
+
+begin boundary condition
+	type = Dirichlet
+	node set = zMin 
+	dof id = 3
+	value = 0.0
+end
+
+begin load condition
+	type = pressure
+	surface set = AppliedLoad 
+	value = 100.0
+end
+
+begin load condition
+	type = pressure
+	surface set = InterferenceFit 
+	value = 100.0
+end
