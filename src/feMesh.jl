@@ -94,6 +94,26 @@ function buildConstrainedDOFList(NODES, NS::Array{feDatastruct.feNodeSet,1})
     return isConstrainedGDOF
 end
 
+function buildElementQuadrature(ELEMS)
+    num_elems = length(ELEMS)
+    for e = 1:num_elems
+        eDegree = ELEMS[e].Degree
+        num_dims = length(eDegree)
+        ELEMS[e].Quadrature = feDatastruct.Quadrature()
+        ELEMS[e].Quadrature.Type = "Gauss-Legendre"
+        ELEMS[e].Quadrature.Points = Array{Array{Float64,1},1}(undef,num_dims) #Array{Any,1}(undef,num_dims)
+        ELEMS[e].Quadrature.Weights = Array{Array{Float64,1},1}(undef,num_dims) #Array{Any,1}(undef,num_dims)
+        for dim = 1:num_dims
+            nPts = Int(ceil((eDegree[dim] + 1)/2))
+            ξ, W = feQuadrature.computeGaussQuadrature(nPts)
+            ELEMS[e].Quadrature.Points[dim] = ξ
+            ELEMS[e].Quadrature.Weights[dim] = W
+        end
+        
+    end
+    return ELEMS
+end
+
 function getDimension(elem_type::String)
     ETYPE_1D = ["BAR2"]
     ETYPE_2D = ["TRI3","QUAD4"]
