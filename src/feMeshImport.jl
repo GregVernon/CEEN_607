@@ -81,7 +81,7 @@ function initSurfaceSets(G,ELEMS)
     return SS
 end
 
-function initNodeSets(G)
+function initNodeSets(G,PARAMS)
     # Get global information about the Genesis file
     num_dim       = G.dim["num_dim"]
     num_nodes     = G.dim["num_nodes"]
@@ -103,6 +103,15 @@ function initNodeSets(G)
             ns_name = ns_names[:,n]
             ns_name = join(ns_name[ns_name .!= '\0'])
             NS[n].Name = ns_name
+        end
+
+        # Set the constrained DOF for the nodesets
+        for n = 1:num_node_sets
+            for m = 1:num_node_sets
+                if lowercase(NS[n].Name) == lowercase(PARAMS.NodeSets[m].NodeSetName)
+                    NS[n].ConstrainedDOF = PARAMS.NodeSets[m].DOF
+                end
+            end
         end
     end
 
