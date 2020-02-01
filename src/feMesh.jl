@@ -88,7 +88,7 @@ function buildConstrainedDOFList(NODES, NS)
         num_ns_nodes = length(NS[i].ChildNodes)
         for n = 1:num_ns_nodes
             for ldof = 1:length(constrained_ldof)
-                gdofID = NodeConnect[constrained_ldof,NS[i].ChildNodes[n]]
+                gdofID = NodeConnect[constrained_ldof[ldof],NS[i].ChildNodes[n]]
                 isConstrainedGDOF[gdofID] = true
             end
         end
