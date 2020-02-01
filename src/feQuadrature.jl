@@ -7,6 +7,8 @@ import ForwardDiff
 include("feBasisFunctions.jl")
 import .feBasisFunctions
 
+export computeGaussQuadrature
+export evaluateGaussQuadrature
 function computeGaussQuadrature(nPt::Int)
     if nPt == 0
         ξᵢ = 0
@@ -22,4 +24,9 @@ function computeGaussQuadrature(nPt::Int)
     return ξᵢ , Wᵢ
 end
 
+function evaluateGaussQuadrature(fun,ξᵢ::Array{Float64,1},Wᵢ::Array{Float64,1})
+    integral = fun(ξᵢ) .* transpose(Wᵢ)
+    integral = sum(integral, dims=1)
+    return integral
+end
 end
