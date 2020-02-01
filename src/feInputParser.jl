@@ -85,6 +85,7 @@ function parseBoundaryCondition(Card)
     bc_dofid_index = findall(occursin.("dof id",Card))
     bc_dofid_line = Card[bc_dofid_index][1]
     bc_dofid = strip(split(bc_dofid_line,"=")[end])
+    bc_dofid = parse(Int,bc_dofid)
     
     # Get BC Value
     bc_value_index = findall(occursin.("value",Card))
