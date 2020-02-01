@@ -23,12 +23,7 @@ function importInput(filename)
 end
 
 function findInputCards(fLines)
-    # First get the geometry
-    geomLine = findall(occursin.("geometry",fLines))[1]
-    geomFile = strip(split(fLines[geomLine])[end])
-    G = feMeshImport.importGenomat(geomFile)
-
-    # Next get parameters
+    # First get parameters
     beginLines = findall(occursin.("begin",fLines))
     endLines = findall(occursin.("end",fLines))
 
@@ -61,8 +56,18 @@ function findInputCards(fLines)
         lcCard = fLines[(lcStartLines[lc]+1) : (lcEndLines[lc]-1)]
         LC[lc] = parseLoadCondition(lcCard)
     end
-   
-    return G, BC, LC
+
+    # Set the loaded cards as parameters
+    PARAMS = InputParams()
+    PARAMS.BoundaryConditions = BC
+    PARAMS.LoadConditions = LC
+
+    # Finally, import the geometry
+    geomLine = findall(occursin.("geometry",fLines))[1]
+    geomFile = strip(split(fLines[geomLine])[end])
+    G = feMeshImport.importGenomat(geomFile,PARAMS)
+
+    return G, PARAMS
 end
 
 function parseBoundaryCondition(Card)
