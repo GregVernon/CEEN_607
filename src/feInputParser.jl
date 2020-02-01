@@ -17,11 +17,7 @@ function importInput(filename)
     fLines = strip.(fLines)
     fLines = lowercase.(fLines)
 
-    GEOM, BC, LC = findInputCards(fLines)
-    
-    PARAMS = InputParams()
-    PARAMS.BoundaryConditions = BC
-    PARAMS.LoadConditions = LC
+    GEOM, PARAMS = findInputCards(fLines)
 
     return GEOM, PARAMS
 end
