@@ -1,0 +1,20 @@
+geometry = single_element_test.g
+
+begin boundary condition
+	type = Dirichlet
+	node set = node1 
+	dof id = 1 2 3
+	value = 0.0 0.0 0.0
+end
+
+begin load condition
+	type = pressure
+	surface set = surf1 
+	value = 100.0
+end
+
+begin element block
+    quadrature family = Gauss
+    quadrature basis = Legendre
+    quadrature scheme = QP1
+end element block
