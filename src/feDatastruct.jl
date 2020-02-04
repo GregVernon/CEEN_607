@@ -97,8 +97,8 @@ function makeExodusElement(elem_type)
 
     if elem_type == "QUAD4"
         ElementNodeOrder = [1 2 4 3]
-        ElementFaceOrder = [1]
-        FaceNodeOrder = [[1 2 4 3]]
+        ElementFaceOrder = [4 2 1 3]
+        FaceNodeOrder = [[3 1], [2 4], [1 2], [4 3]]
         isBoundaryNode = fill(true,4)
         isCornerNode = fill(true,4)
         isFaceNode = fill(true,4)

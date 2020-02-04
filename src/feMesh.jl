@@ -2,8 +2,12 @@ module feMesh
 
 include("feDatastruct.jl")
 include("feQuadrature.jl")
+include("feBasisFunctions.jl")
+include("feEnumerations.jl")
 import .feDatastruct
 import .feQuadrature
+import .feBasisFunctions
+import .feEnumerations
 
 export buildGlobalNodeCoordinateArray
 export buildGlobalElementNodalConnectivityArray
@@ -107,12 +111,28 @@ function buildElementQuadrature(ELEMS)
         ELEMS[e].Quadrature.Points = Array{Array{Float64,1},1}(undef,num_dims) #Array{Any,1}(undef,num_dims)
         ELEMS[e].Quadrature.Weights = Array{Array{Float64,1},1}(undef,num_dims) #Array{Any,1}(undef,num_dims)
         for dim = 1:num_dims
-            nPts = Int(ceil((eDegree[dim] + 1)/2))
+            nPts = Int(ceil((eDegree[dim] + 1)/2)) + 1
             ξ, W = feQuadrature.computeGaussQuadrature(nPts)
             ELEMS[e].Quadrature.Points[dim] = ξ
             ELEMS[e].Quadrature.Weights[dim] = W
         end
         
+    end
+    return ELEMS
+end
+
+function buildElementBasisFunctions(ELEMS)
+    num_elems = length(ELEMS)
+    for e = 1:num_elems
+        elem_degree = ELEMS[e].Degree
+        elem_dim = ELEMS[e].Dimension
+        num_dims = length(elem_degree)
+        num_loc_nodes = ELEMS[e].NumNodes
+        bfun = Array{Any,1}(undef,num_loc_nodes)
+        for n = 1:num_loc_nodes
+            bfun[n] = feBasisFunctions.constructBasis(Val(feBasisFunctions.feEnumerations.lagrange),elem_degree,n)
+        end
+        ELEMS[e].Basis = bfun
     end
     return ELEMS
 end
