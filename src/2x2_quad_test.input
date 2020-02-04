@@ -1,0 +1,33 @@
+geometry = 2x2_quad_test.g
+
+begin boundary condition
+	type = Dirichlet
+	node set = xmin 
+	dof id = 1 2 3
+	value = 0.0 0.0 0.0
+end
+
+begin boundary condition
+	type = Dirichlet
+	node set = ymin 
+	dof id = 1 2 3
+	value = 0.0 0.0 0.0
+end
+
+begin load condition
+	type = pressure
+	surface set = xmax 
+	value = 100.0
+end
+
+begin load condition
+	type = pressure
+	surface set = ymax 
+	value = 100.0
+end
+
+begin element block
+    quadrature family = Gauss
+    quadrature basis = Legendre
+    quadrature scheme = QP1
+end element block
