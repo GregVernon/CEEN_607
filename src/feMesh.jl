@@ -156,6 +156,27 @@ function buildElementBasisGradientFunctions(ELEMS)
     end
     return ELEMS
 end
+
+function cacheQuadratureBasisEvaluations(ELEMS)
+    num_elems = length(ELEMS)
+    for e = 1:num_elems
+        num_quad_points = length(ELEMS[e].Quadrature.Points)
+        num_loc_nodes = ELEMS[e].NumNodes
+        num_dim = ELEMS[e].Dimension
+        ELEMS[e].Quadrature.Basis_Evaluation = zeros(num_quad_points)
+        ELEMS[e].Quadrature.∂Basis_Evaluation = fill(zeros(num_dim),num_loc_nodes)
+        for q = 1:num_quad_points
+            ξ = ELEMS[e].Quadrature.Points[q]
+            println(ξ)
+            for n = 1:num_loc_nodes
+                ELEMS[e].Quadrature.Basis_Evaluation[q] += ELEMS[e].Basis[n](ξ)
+                ELEMS[e].Quadrature.∂Basis_Evaluation[q] +=  ELEMS[e].∂Basis[n](ξ)
+            end
+        end
+    end
+    return ELEMS
+end
+
 function Parametric_2_Cartesian(Element,ξ)
     num_loc_nodes = Element.NumNodes
     num_dim = length(ξ)
