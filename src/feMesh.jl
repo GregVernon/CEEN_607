@@ -1,5 +1,7 @@
 module feMesh
 
+import ForwardDiff
+
 include("feDatastruct.jl")
 include("feQuadrature.jl")
 include("feBasisFunctions.jl")
@@ -137,6 +139,23 @@ function buildElementBasisFunctions(ELEMS)
     return ELEMS
 end
 
+function buildElementBasisGradientFunctions(ELEMS)
+    num_elems = length(ELEMS)
+    for e = 1:num_elems
+        currElement = ELEMS[e]
+        elem_degree = currElement.Degree
+        elem_dim = currElement.Dimension
+        elemBasis = currElement.Basis
+        num_dims = length(elem_degree)
+        num_loc_nodes = currElement.NumNodes
+        gfun = Array{Any,1}(undef,num_loc_nodes)
+        for n = 1:num_loc_nodes
+            gfun[n] = ξ->ForwardDiff.gradient(elemBasis[n],ξ)
+        end
+        ELEMS[e].∂Basis = gfun
+    end
+    return ELEMS
+end
 function Parametric_2_Cartesian(Element,ξ)
     num_loc_nodes = Element.NumNodes
     num_dim = length(ξ)
