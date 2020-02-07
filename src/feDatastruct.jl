@@ -13,6 +13,7 @@ end
 
 mutable struct feElement
     Basis
+    ∂Basis
     BoundaryNodes # DONE
     ParentBlocks # DONE
     ChildNodes # DONE
