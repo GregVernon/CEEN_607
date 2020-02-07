@@ -36,7 +36,7 @@ function constructBasis(::Val{feEnumerations.lagrange},elem_degree)
 end
 
 function constructBasis(::Val{feEnumerations.lagrange},elem_degree,loc_node_id)
-    loc_node_indices = LocalNodeID_to_LocalNodeIndices(elem_degree,loc_node_id)
+    loc_node_indices = TensorProdcut_ID_to_Indices(elem_degree,loc_node_id)
     println(loc_node_indices)
     num_dim = length(elem_degree)
     if     num_dim == 1
@@ -172,7 +172,7 @@ function bernsteinBasis(degree::Int64,ξ::Array{Float64,1})
     return B
 end
 
-function LocalNodeID_to_LocalNodeIndices(elem_degree,loc_node_id)
+function TensorProdcut_ID_to_Indices(elem_degree,loc_node_id)
     num_dim = length(elem_degree)
     if num_dim == 1
         return loc_node_id
