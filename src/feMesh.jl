@@ -110,15 +110,45 @@ function buildElementQuadrature(ELEMS)
         num_dims = length(eDegree)
         ELEMS[e].Quadrature = feDatastruct.Quadrature()
         ELEMS[e].Quadrature.Type = "Gauss-Legendre"
-        ELEMS[e].Quadrature.Points = Array{Array{Float64,1},1}(undef,num_dims) #Array{Any,1}(undef,num_dims)
-        ELEMS[e].Quadrature.Weights = Array{Array{Float64,1},1}(undef,num_dims) #Array{Any,1}(undef,num_dims)
+        ELEMS[e].Quadrature.Component_Points = Array{Array{Float64},1}(undef,num_dims) #Array{Any,1}(undef,num_dims)
+        ELEMS[e].Quadrature.Component_Weights = Array{Array{Float64},1}(undef,num_dims) #Array{Any,1}(undef,num_dims)
+        nPts = zeros(Int64,num_dims)
         for dim = 1:num_dims
-            nPts = Int(ceil((eDegree[dim] + 1)/2)) + 1
-            ξ, W = feQuadrature.computeGaussQuadrature(nPts)
-            ELEMS[e].Quadrature.Points[dim] = ξ
-            ELEMS[e].Quadrature.Weights[dim] = W
+            nPts[dim] = Int(ceil((eDegree[dim] + 1)/2)) + 1
+            ξ, W = feQuadrature.computeGaussQuadrature(nPts[dim])
+            ELEMS[e].Quadrature.Component_Points[dim] = ξ
+            ELEMS[e].Quadrature.Component_Weights[dim] = W
         end
-        
+
+        num_quad_points = prod(nPts)
+        ELEMS[e].Quadrature.Points = fill(zeros(num_dims),num_quad_points)
+        ELEMS[e].Quadrature.Weights = zeros(num_quad_points)
+        q = 0
+        if num_dims == 1
+            for q1 = 1:nPts[1]
+                q+=1
+                ELEMS[e].Quadrature.Points[q] = ELEMS[e].Quadrature.Component_Points[1][q1]
+                ELEMS[e].Quadrature.Weights[q] = ELEMS[e].Quadrature.Component_Weights[1][q1]
+            end
+        elseif num_dims == 2
+            for q1 = 1:nPts[1]
+                for q2 = 1:nPts[2]
+                    q+=1
+                    ELEMS[e].Quadrature.Points[q] = [ELEMS[e].Quadrature.Component_Points[1][q1], ELEMS[e].Quadrature.Component_Points[2][q2]]
+                    ELEMS[e].Quadrature.Weights[q] = ELEMS[e].Quadrature.Component_Weights[1][q1] * ELEMS[e].Quadrature.Component_Weights[2][q2]
+                end
+            end
+        elseif num_dims == 3
+            for q1 = 1:nPts[1]
+                for q2 = 1:nPts[2]
+                    for q3 = 1:nPts[3]
+                        q+=1
+                        ELEMS[e].Quadrature.Points[q] = [ELEMS[e].Quadrature.Component_Points[1][q1], ELEMS[e].Quadrature.Component_Points[2][q2], ELEMS[e].Quadrature.Component_Points[3][q3]]
+                        ELEMS[e].Quadrature.Weights[q] = ELEMS[e].Quadrature.Component_Weights[1][q1] * ELEMS[e].Quadrature.Component_Weights[2][q2] * ELEMS[e].Quadrature.Component_Weights[3][q3]
+                    end
+                end
+            end
+        end
     end
     return ELEMS
 end
