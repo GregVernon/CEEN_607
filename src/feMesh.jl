@@ -137,6 +137,15 @@ function buildElementBasisFunctions(ELEMS)
     return ELEMS
 end
 
+function Parametric_2_Cartesian(Element,ξ)
+    num_loc_nodes = Element.NumNodes
+    num_dim = length(ξ)
+    x = zeros(num_dim)
+    for n = 1:num_loc_nodes
+        x += Element.Basis[n](ξ)
+    end
+    return x
+end
 function getDimension(elem_type::String)
     ETYPE_1D = ["BAR2"]
     ETYPE_2D = ["TRI3","QUAD4"]
