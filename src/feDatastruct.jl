@@ -68,7 +68,11 @@ end
 mutable struct Quadrature
     Type
     Points
+    Component_Points
     Weights
+    Component_Weights
+    Basis_Evaluation
+    ∂Basis_Evaluation
     Quadrature() = new()
 end
 
