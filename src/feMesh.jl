@@ -199,7 +199,6 @@ function cacheQuadratureBasisEvaluations(ELEMS)
         for q = 1:num_quad_points
             ξ = zeros(num_dim)
             ξ[1:num_variates] .= ELEMS[e].Quadrature.Points[q]
-            println(ξ)
             for n = 1:num_loc_nodes
                 ELEMS[e].Quadrature.Basis_Evaluation[q] += ELEMS[e].Basis[n](ξ)
                 ELEMS[e].Quadrature.∂Basis_Evaluation[q] +=  ELEMS[e].∂Basis[n](ξ)
