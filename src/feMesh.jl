@@ -107,13 +107,14 @@ function buildElementQuadrature(ELEMS)
     num_elems = length(ELEMS)
     for e = 1:num_elems
         eDegree = ELEMS[e].Degree
-        num_dims = length(eDegree)
+        num_variates = ELEMS[e].NumVariates
+        num_dims = ELEMS[e].Dimension
         ELEMS[e].Quadrature = feDatastruct.Quadrature()
         ELEMS[e].Quadrature.Type = "Gauss-Legendre"
-        ELEMS[e].Quadrature.Component_Points = Array{Array{Float64},1}(undef,num_dims) #Array{Any,1}(undef,num_dims)
-        ELEMS[e].Quadrature.Component_Weights = Array{Array{Float64},1}(undef,num_dims) #Array{Any,1}(undef,num_dims)
-        nPts = zeros(Int64,num_dims)
-        for dim = 1:num_dims
+        ELEMS[e].Quadrature.Component_Points = Array{Array{Float64},1}(undef,num_variates) #Array{Any,1}(undef,num_dims)
+        ELEMS[e].Quadrature.Component_Weights = Array{Array{Float64},1}(undef,num_variates) #Array{Any,1}(undef,num_dims)
+        nPts = zeros(Int64,num_variates)
+        for dim = 1:num_variates
             nPts[dim] = Int(ceil((eDegree[dim] + 1)/2)) + 1
             ξ, W = feQuadrature.computeGaussQuadrature(nPts[dim])
             ELEMS[e].Quadrature.Component_Points[dim] = ξ
@@ -124,13 +125,13 @@ function buildElementQuadrature(ELEMS)
         ELEMS[e].Quadrature.Points = fill(zeros(num_dims),num_quad_points)
         ELEMS[e].Quadrature.Weights = zeros(num_quad_points)
         q = 0
-        if num_dims == 1
+        if num_variates == 1
             for q1 = 1:nPts[1]
                 q+=1
                 ELEMS[e].Quadrature.Points[q] = ELEMS[e].Quadrature.Component_Points[1][q1]
                 ELEMS[e].Quadrature.Weights[q] = ELEMS[e].Quadrature.Component_Weights[1][q1]
             end
-        elseif num_dims == 2
+        elseif num_variates == 2
             for q1 = 1:nPts[1]
                 for q2 = 1:nPts[2]
                     q+=1
@@ -138,7 +139,7 @@ function buildElementQuadrature(ELEMS)
                     ELEMS[e].Quadrature.Weights[q] = ELEMS[e].Quadrature.Component_Weights[1][q1] * ELEMS[e].Quadrature.Component_Weights[2][q2]
                 end
             end
-        elseif num_dims == 3
+        elseif num_variates == 3
             for q1 = 1:nPts[1]
                 for q2 = 1:nPts[2]
                     for q3 = 1:nPts[3]
@@ -157,8 +158,7 @@ function buildElementBasisFunctions(ELEMS)
     num_elems = length(ELEMS)
     for e = 1:num_elems
         elem_degree = ELEMS[e].Degree
-        elem_dim = ELEMS[e].Dimension
-        num_dims = length(elem_degree)
+        num_dims = ELEMS[e].Dimension
         num_loc_nodes = ELEMS[e].NumNodes
         bfun = Array{Any,1}(undef,num_loc_nodes)
         for n = 1:num_loc_nodes
@@ -192,15 +192,42 @@ function cacheQuadratureBasisEvaluations(ELEMS)
     for e = 1:num_elems
         num_quad_points = length(ELEMS[e].Quadrature.Points)
         num_loc_nodes = ELEMS[e].NumNodes
+        num_variates = ELEMS[e].NumVariates
         num_dim = ELEMS[e].Dimension
         ELEMS[e].Quadrature.Basis_Evaluation = zeros(num_quad_points)
         ELEMS[e].Quadrature.∂Basis_Evaluation = fill(zeros(num_dim),num_loc_nodes)
         for q = 1:num_quad_points
-            ξ = ELEMS[e].Quadrature.Points[q]
+            ξ = zeros(num_dim)
+            ξ[1:num_variates] .= ELEMS[e].Quadrature.Points[q]
             println(ξ)
             for n = 1:num_loc_nodes
                 ELEMS[e].Quadrature.Basis_Evaluation[q] += ELEMS[e].Basis[n](ξ)
                 ELEMS[e].Quadrature.∂Basis_Evaluation[q] +=  ELEMS[e].∂Basis[n](ξ)
+            end
+        end
+    end
+    return ELEMS
+end
+
+function cacheQuadratureJacobianEvaluations(ELEMS,NODES)
+    num_elems = length(ELEMS)
+    for e = 1:num_elems
+        num_quad_points = length(ELEMS[e].Quadrature.Points)
+        num_local_nodes = ELEMS[e].NumNodes
+        num_variates = ELEMS[e].NumVariates
+        num_dim = ELEMS[e].Dimension
+        ELEMS[e].Quadrature.JacobianMatrix_Evaluation = Array{Array{Float64,2},1}(undef,num_quad_points)
+        for q = 1:num_local_nodes
+            ELEMS[e].Quadrature.JacobianMatrix_Evaluation[q] = zeros(Float64,num_local_nodes,num_dim)
+        end
+
+        for n = 1:num_local_nodes
+            x = NODES[ELEMS[e].ChildNodes[n]].Coordinates
+            for q = 1:num_quad_points
+                ξ = zeros(num_dim)
+                ξ[1:num_variates] .= ELEMS[e].Quadrature.Points[q]
+                J = computeJacobian(ELEMS[e],ξ,x)
+                ELEMS[e].Quadrature.JacobianMatrix_Evaluation[q][1:size(J,1),1:size(J,2)] .+= J
             end
         end
     end
@@ -216,18 +243,30 @@ function Parametric_2_Cartesian(Element,ξ)
     end
     return x
 end
-function getDimension(elem_type::String)
+
+function computeJacobian(Element,ξ,x)
+    num_loc_nodes = Element.NumNodes
+    num_variates = Element.NumVariates
+    num_dim = Element.Dimension
+    J = zeros(Float64,num_loc_nodes,num_dim)
+    for n = 1:num_loc_nodes
+        J[n,:] = Element.∂Basis[n](ξ) .* x
+    end
+    return J
+end
+
+function getNumVariates(elem_type::String)
     ETYPE_1D = ["BAR2"]
     ETYPE_2D = ["TRI3","QUAD4"]
     ETYPE_3D = ["TETRA4","PYRAMID5","WEDGE6","HEX8"]
     if      elem_type in ETYPE_1D
-        Dimension = 1
+        NumVar = 1
     elseif  elem_type in ETYPE_2D
-        Dimension = 2
+        NumVar = 2
     elseif  elem_type in ETYPE_3D
-        Dimension = 3
+        NumVar = 3
     end
-    return Dimension
+    return NumVar
 end
 
 function assignNodeDOFS(NODES, num_dim)

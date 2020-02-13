@@ -20,6 +20,7 @@ mutable struct feElement
     CornerNodes # DONE
     Degree # DONE
     Dimension # DONE
+    NumVariates
     ElementFamily # DONE
     FaceNodes # DONE
     GlobalID # DONE
@@ -74,6 +75,7 @@ mutable struct Quadrature
     Component_Weights
     Basis_Evaluation
     ∂Basis_Evaluation
+    JacobianMatrix_Evaluation
     Quadrature() = new()
 end
 

@@ -136,13 +136,14 @@ function initElements(G)
         elem_type = G[blk_name].attrib["elem_type"]
         referenceElement = feDatastruct.makeExodusElement(elem_type)
         E2G_nodeOrder = referenceElement.ElementNodeOrder
-        Dimension = feMesh.getDimension(elem_type)
+        NumVariates = feMesh.getNumVariates(elem_type)
         num_elem_in_block = size(G[blk_name].var[:],2)
         for blk_e = 1:num_elem_in_block
             e+=1
             # ELEMS[e] = feDatastruct.feElement()
-            ELEMS[e].Dimension = Dimension
-            ELEMS[e].Degree = ones(Int8, Dimension)
+            ELEMS[e].Dimension = num_dim
+            ELEMS[e].NumVariates = NumVariates
+            ELEMS[e].Degree = ones(Int8, NumVariates)
             ELEMS[e].ElementFamily = elem_type
             ELEMS[e].ChildNodes = G[blk_name].var[E2G_nodeOrder,blk_e]
             ELEMS[e].GlobalID = e
@@ -177,12 +178,12 @@ function initNodes(G,ELEMS)
         elseif num_dim == 2
             coordx = G["coordx"].var[n]
             coordy = G["coordy"].var[n]
-            NODES[n].Coordinates = [coordx coordy]
+            NODES[n].Coordinates = [coordx, coordy]
         elseif num_dim == 3
             coordx = G["coordx"].var[n]
             coordy = G["coordy"].var[n]
             coordz = G["coordz"].var[n]
-            NODES[n].Coordinates = [coordx coordy coordz]
+            NODES[n].Coordinates = [coordx, coordy, coordz]
         end
     end
 

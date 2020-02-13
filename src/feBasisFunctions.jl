@@ -38,15 +38,15 @@ end
 function constructBasis(::Val{feEnumerations.lagrange},elem_degree,loc_node_id)
     loc_node_indices = TensorProdcut_ID_to_Indices(elem_degree,loc_node_id)
     println(loc_node_indices)
-    num_dim = length(elem_degree)
-    if     num_dim == 1
+    num_variates = length(elem_degree)
+    if     num_variates == 1
         u = ξ -> lagrangeBasis(elem_degree[1],loc_node_indices,ξ)
         return F(ξ) = u(ξ)
-    elseif num_dim == 2
+    elseif num_variates == 2
         u = ξ -> lagrangeBasis(elem_degree[1],loc_node_indices[1],ξ)
         v = η -> lagrangeBasis(elem_degree[2],loc_node_indices[2],η)
         return G(ξη) = u(ξη[1]) * v(ξη[2])
-    elseif num_dim == 3
+    elseif num_variates == 3
         u = ξ -> lagrangeBasis(elem_degree[1],loc_node_indices[1],ξ)
         v = η -> lagrangeBasis(elem_degree[2],loc_node_indices[2],η)
         w = ζ -> lagrangeBasis(elem_degree[3],loc_node_indices[3],ζ)
