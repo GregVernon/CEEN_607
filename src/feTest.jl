@@ -238,6 +238,74 @@ end
     end
 end
 
+@testset "Geometric Mapping" begin
+    @testset "Dimension = 1" begin
+        @testset "Degree = 1" begin
+            deg = 1
+            Nₐ = ξ->LagrangeBasis_1D(deg,ξ)
+            xₐ = buildLocalNodeCoordinates_1D(deg)
+            ξ = rand(1)
+            @test all(computeGeometricMapping(Nₐ, xₐ, ξ) .≈ ξ)
+            @test all(computeGeometricMapping(Nₐ, 2*xₐ, ξ) .≈ 2*ξ)
+            @test all(computeGeometricMapping(Nₐ, xₐ.+2, ξ) .≈ ξ .+ 2)
+        end
+
+        @testset "Degree = 2" begin
+            deg = 2
+            Nₐ = ξ->LagrangeBasis_1D(deg,ξ)
+            xₐ = buildLocalNodeCoordinates_1D(deg)
+            ξ = rand(1)
+            @test all(computeGeometricMapping(Nₐ, xₐ, ξ) .≈ ξ)
+            @test all(computeGeometricMapping(Nₐ, 2*xₐ, ξ) .≈ 2*ξ)
+            @test all(computeGeometricMapping(Nₐ, xₐ.+2, ξ) .≈ ξ .+ 2)
+        end
+    end
+
+    @testset "Dimension = 2" begin
+        @testset "Degree = 1" begin
+            deg = 1
+            Nₐ = ξ->LagrangeBasis_2D(deg,ξ)
+            xₐ = buildLocalNodeCoordinates_2D(deg)
+            ξ = rand(2)
+            @test all(computeGeometricMapping(Nₐ, xₐ, ξ) .≈ ξ)
+            @test all(computeGeometricMapping(Nₐ, 2*xₐ, ξ) .≈ 2*ξ)
+            @test all(computeGeometricMapping(Nₐ, xₐ.+2, ξ) .≈ ξ .+ 2)
+        end
+
+        @testset "Degree = 2" begin
+            deg = 2
+            Nₐ = ξ->LagrangeBasis_2D(deg,ξ)
+            xₐ = buildLocalNodeCoordinates_2D(deg)
+            ξ = rand(2)
+            @test all(computeGeometricMapping(Nₐ, xₐ, ξ) .≈ ξ)
+            @test all(computeGeometricMapping(Nₐ, 2*xₐ, ξ) .≈ 2*ξ)
+            @test all(computeGeometricMapping(Nₐ, xₐ.+2, ξ) .≈ ξ .+ 2)
+        end
+    end
+
+    @testset "Dimension = 3" begin
+        @testset "Degree = 1" begin
+            deg = 1
+            Nₐ = ξ->LagrangeBasis_3D(deg,ξ)
+            xₐ = buildLocalNodeCoordinates_3D(deg)
+            ξ = rand(3)
+            @test all(computeGeometricMapping(Nₐ, xₐ, ξ) .≈ ξ)
+            @test all(computeGeometricMapping(Nₐ, 2*xₐ, ξ) .≈ 2*ξ)
+            @test all(computeGeometricMapping(Nₐ, xₐ.+2, ξ) .≈ ξ .+ 2)
+        end
+
+        @testset "Degree = 2" begin
+            deg = 2
+            Nₐ = ξ->LagrangeBasis_3D(deg,ξ)
+            xₐ = buildLocalNodeCoordinates_3D(deg)
+            ξ = rand(3)
+            @test all(computeGeometricMapping(Nₐ, xₐ, ξ) .≈ ξ)
+            @test all(computeGeometricMapping(Nₐ, 2*xₐ, ξ) .≈ 2*ξ)
+            @test all(computeGeometricMapping(Nₐ, xₐ.+2, ξ) .≈ ξ .+ 2)
+        end
+    end
+end
+
 @testset "Nodal Coordinates" begin
     @testset "Dimension = 1" begin
         @testset "Degree = 1" begin

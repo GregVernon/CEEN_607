@@ -171,4 +171,12 @@ function ∂LagrangeBasis_3D(deg,ξ)
     end
     return ∂L
 end
+
+function computeGeometricMapping(Nₐ, xₐ, ξ)
+    x = NamedDimsArray{(:ℝᴺ,)}(zeros(Float64,size(ξ)))
+    num_nodes = size(xₐ, :local_node_id)
+    for n = 1:num_nodes
+        x += Nₐ(ξ)[n] .* xₐ[n,:]
+    end
+    return x
 end
