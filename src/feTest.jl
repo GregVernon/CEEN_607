@@ -190,18 +190,18 @@ end
     @testset "Degree = 1" begin
         degree = 1
         numNodes = (degree + 1) ^ 2
-        nodeCoords = [[-1., -1.], [1., -1.], [-1., 1.],[1., 1.]]
+        nodeCoords = buildLocalNodeCoordinates_2D(degree)
         for n = 1:numNodes
-            @test LagrangeBasis_2D(degree, nodeCoords[n])[n] ≈ 1.0
+            @test LagrangeBasis_2D(degree, nodeCoords[n,:])[n] ≈ 1.0
         end
     end
 
     @testset "Degree = 2" begin
         degree = 2
         numNodes = (degree + 1)^2
-        nodeCoords = [[-1., -1.], [0., -1.], [1., -1.], [-1., 0.],[0., 0.], [1., 0.], [-1., 1.], [0., 1.] ,[1., 1.]]
+        nodeCoords = buildLocalNodeCoordinates_2D(degree)
         for n = 1:numNodes
-            @test LagrangeBasis_2D(degree, nodeCoords[n])[n] ≈ 1.0
+            @test LagrangeBasis_2D(degree, nodeCoords[n,:])[n] ≈ 1.0
         end
     end
 end
@@ -211,29 +211,18 @@ end
     @testset "Degree = 1" begin
         degree = 1
         numNodes = (degree + 1) ^ 3
-        nodeCoords = [[-1., -1., -1.], [1., -1., -1.], 
-                      [-1.,  1., -1.], [1.,  1., -1.], 
-                      [-1., -1.,  1.], [1., -1.,  1.], 
-                      [-1.,  1.,  1.], [1.,  1.,  1.]]
+        nodeCoords = buildLocalNodeCoordinates_3D(degree)
         for n = 1:numNodes
-            @test LagrangeBasis_3D(degree, nodeCoords[n])[n] ≈ 1.0
+            @test LagrangeBasis_3D(degree, nodeCoords[n,:])[n] ≈ 1.0
         end
     end
 
     @testset "Degree = 2" begin
         degree = 2
         numNodes = (degree + 1)^3
-        nodeCoords = [[-1., -1., -1.], [0., -1., -1.], [1., -1., -1.], 
-                      [-1.,  0., -1.], [0.,  0., -1.], [1.,  0., -1.],
-                      [-1.,  1., -1.], [0.,  1., -1.], [1.,  1., -1.],
-                      [-1., -1.,  0.], [0., -1.,  0.], [1., -1.,  0.], 
-                      [-1.,  0.,  0.], [0.,  0.,  0.], [1.,  0.,  0.],
-                      [-1.,  1.,  0.], [0.,  1.,  0.], [1.,  1.,  0.],
-                      [-1., -1.,  1.], [0., -1.,  1.], [1., -1.,  1.], 
-                      [-1.,  0.,  1.], [0.,  0.,  1.], [1.,  0.,  1.],
-                      [-1.,  1.,  1.], [0.,  1.,  1.], [1.,  1.,  1.]]
+        nodeCoords = buildLocalNodeCoordinates_3D(degree)
         for n = 1:numNodes
-            @test LagrangeBasis_3D(degree, nodeCoords[n])[n] ≈ 1.0
+            @test LagrangeBasis_3D(degree, nodeCoords[n,:])[n] ≈ 1.0
         end
     end
 end
