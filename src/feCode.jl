@@ -52,7 +52,7 @@ function GaussQuadratureRule_2D(nPts)
     η,W[2] = GaussQuadratureRule_1D(nPts)
 
     nQP = nPts^2
-    QP = NamedDimsArray{(:local_qp_id, :ℜ_2)}(zeros(Float64,nQP,2))
+    QP = NamedDimsArray{(:local_qp_id, :ℝᴺ)}(zeros(Float64,nQP,2))
     QW = NamedDimsArray{(:local_qp_id,)}(zeros(Float64,nQP))
     n = 0
     for j = 1:nPts
@@ -72,7 +72,7 @@ function GaussQuadratureRule_3D(nPts)
     ζ,W[3] = GaussQuadratureRule_1D(nPts)
 
     nQP = nPts^3
-    QP = NamedDimsArray{(:local_qp_id, :ℜ_3)}(zeros(Float64,nQP,3))
+    QP = NamedDimsArray{(:local_qp_id, :ℝᴺ)}(zeros(Float64,nQP,3))
     QW = NamedDimsArray{(:local_qp_id,)}(zeros(Float64,nQP))
     n = 0
     for k = 1:nPts
