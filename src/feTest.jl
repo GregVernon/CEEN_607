@@ -289,7 +289,7 @@ end
 
 @testset "3D Lagrange Basis Derivatives" begin
     @testset "Degree = 1" begin
-        
+        degree = 1
         @test ∇LagrangeBasis_3D(degree,[-1.0, -1.0, -1.0]) ≈ [-1/2 -1/2 -1/2;
                                                                1/2   0.   0.;
                                                                0.   1/2   0.;
