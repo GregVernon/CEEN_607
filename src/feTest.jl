@@ -227,6 +227,120 @@ end
     end
 end
 
+@testset "1D Lagrange Basis Derivatives" begin
+    @testset "Degree = 1" begin
+        degree = 1
+        @test ∇LagrangeBasis_1D(degree,[-1.0]) ≈ [-0.5, 0.5]
+        @test ∇LagrangeBasis_1D(degree,[+1.0]) ≈ [-0.5, 0.5]
+    end
+
+    @testset "Degree = 2" begin
+        degree = 2
+        @test ∇LagrangeBasis_1D(degree,[-1.0]) ≈ [-3/2, 2, -1/2]
+        @test ∇LagrangeBasis_1D(degree,[0.0])  ≈ [-1/2, 0, 1/2]
+        @test ∇LagrangeBasis_1D(degree,[+1.0]) ≈ [1/2, -2, 3/2]
+    end
+end
+
+@testset "2D Lagrange Basis Derivatives" begin
+    @testset "Degree = 1" begin
+        degree = 1
+        @test ∇LagrangeBasis_2D(degree,[-1.0, -1.0]) ≈ [-0.5 -0.5; 
+                                                         0.5  0.0; 
+                                                         0.0  0.5; 
+                                                         0.0  0.0]
+        @test ∇LagrangeBasis_2D(degree,[+1.0, +1.0]) ≈ [ 0.0  0.0; 
+                                                         0.0 -0.5; 
+                                                        -0.5  0.0; 
+                                                         0.5  0.5]
+    end
+
+    @testset "Degree = 2" begin
+        degree = 2
+        @test ∇LagrangeBasis_2D(degree,[-1.0, -1.0]) ≈ [-3/2 -3/2;
+                                                         2.    0.;
+                                                        -1/2   0.;
+                                                         0.    2.;
+                                                         0.    0.;
+                                                         0.    0.;
+                                                         0.  -1/2;
+                                                         0.    0.;
+                                                         0.    0.]
+        @test ∇LagrangeBasis_2D(degree,[0.0, 0.0])   ≈ [ 0.    0.;
+                                                         0.  -1/2;
+                                                         0     0.;
+                                                        -1/2.  0.;
+                                                         0.    0.;
+                                                         1/2.  0.;
+                                                         0.    0.;
+                                                         0.   1/2;
+                                                         0.    0.]
+        @test ∇LagrangeBasis_2D(degree,[+1.0, +1.0]) ≈ [ 0.    0.;
+                                                         0.    0.;
+                                                         0.   1/2;
+                                                         0.    0.;
+                                                         0.    0.;
+                                                         0.   -2.;
+                                                         1/2   0.;
+                                                        -2.    0.;
+                                                         3/2  3/2]
+    end
+end
+
+@testset "3D Lagrange Basis Derivatives" begin
+    @testset "Degree = 1" begin
+        
+        @test ∇LagrangeBasis_3D(degree,[-1.0, -1.0, -1.0]) ≈ [-1/2 -1/2 -1/2;
+                                                               1/2   0.   0.;
+                                                               0.   1/2   0.;
+                                                               0.    0.   0.;
+                                                               0.    0.  1/2; 
+                                                               0.    0.   0.;
+                                                               0.    0.   0.;
+                                                               0.    0.   0.]
+
+        @test ∇LagrangeBasis_3D(degree,[+1.0, +1.0, +1.0]) ≈ [ 0.   0.   0.; 
+                                                               0.   0.   0.;
+                                                               0.   0.   0.;
+                                                               0.   0. -1/2;
+                                                               0.   0.   0.;
+                                                               0. -1/2   0.;
+                                                             -1/2   0.   0.;
+                                                              1/2  1/2  1/2]
+                                                         
+    end
+
+    @testset "Degree = 2" begin
+        degree = 2
+        exJac = zeros(Float64,27,3)
+        exJac[1,:] = [-3/2 -3/2 -3/2]
+        exJac[2,1] = 2.
+        exJac[3,1] = -1/2
+        exJac[4,2] = 2.
+        exJac[7,2] = -1/2
+        exJac[10,3] = 2.
+        exJac[19,3] = -1/2
+        @test ∇LagrangeBasis_3D(degree,[-1.0, -1.0, -1.0]) ≈ exJac
+        exJac = zeros(Float64,27,3)
+        exJac[5,3]  = -1/2
+        exJac[11,2] = -1/2
+        exJac[13,1] = -1/2
+        exJac[15,1] = +1/2
+        exJac[17,2] = +1/2
+        exJac[23,3] = +1/2
+        @test ∇LagrangeBasis_3D(degree,[0.0, 0.0, 0.0])   ≈ exJac
+        exJac = zeros(Float64,27,3)
+        exJac[9,3]  = 1/2 
+        exJac[18,3] = -2
+        exJac[21,2] = 1/2
+        exJac[24,2] = -2
+        exJac[25,1] = 1/2
+        exJac[26,1] = -2
+        exJac[27,:] = [3/2 3/2 3/2]
+        @test ∇LagrangeBasis_3D(degree,[+1.0, +1.0, +1.0]) ≈ exJac
+    end
+end
+
 @testset "Geometric Mapping" begin
     @testset "Dimension = 1" begin
         @testset "Degree = 1" begin

@@ -1,5 +1,6 @@
 using NamedDims
 import LinearAlgebra
+import ForwardDiff
 
 function GaussQuadrature_1D(fun, nPts)
     ξ,W = GaussQuadratureRule_1D(nPts)
@@ -89,7 +90,7 @@ end
 
 function LagrangeBasis_1D(deg, ξ)
     ξ = ξ[1]
-    L = NamedDimsArray{(:local_node_id,)}(zeros(Float64,(deg+1)))
+    L = NamedDimsArray{(:local_node_id,)}(Array{Any,1}(undef,deg+1))
     if deg == 1
         L = [(1-ξ)/2, (1+ξ)/2]
         return L
@@ -100,7 +101,7 @@ function LagrangeBasis_1D(deg, ξ)
 end
 
 function LagrangeBasis_2D(deg,ξ)
-    L = NamedDimsArray{(:local_node_id,)}(zeros(Float64,(deg+1)^2))
+    L = NamedDimsArray{(:local_node_id,)}(Array{Any,1}(undef,(deg+1)^2))
     L1 = LagrangeBasis_1D(deg,ξ[1])
     L2 = LagrangeBasis_1D(deg,ξ[2])
     n = 0
@@ -114,7 +115,7 @@ function LagrangeBasis_2D(deg,ξ)
 end
 
 function LagrangeBasis_3D(deg,ξ)
-    L = NamedDimsArray{(:local_node_id,)}(zeros(Float64,(deg+1)^3))
+    L = NamedDimsArray{(:local_node_id,)}(Array{Any,1}(undef,(deg+1)^3))
     L1 = LagrangeBasis_1D(deg,ξ[1])
     L2 = LagrangeBasis_1D(deg,ξ[2])
     L3 = LagrangeBasis_1D(deg,ξ[3])
@@ -130,46 +131,22 @@ function LagrangeBasis_3D(deg,ξ)
     return L
 end
 
-function ∂LagrangeBasis_1D(deg,ξ)
-    if deg == 1
-        ∂L = [-1/2, 1/2]    
-    elseif deg == 2
-        ∂L = [ξ - 1/2, -2*ξ, ξ + 1/2]
-    end
-    return ∂L
+function ∇LagrangeBasis_1D(deg,ξ)
+    f(ξ) = LagrangeBasis_1D(deg,ξ)
+    ∇f = ForwardDiff.jacobian(ξ->f(ξ),ξ)
+    return ∇f
 end
 
-function ∂LagrangeBasis_2D(deg,ξ)
-    num_nodes = (deg+1)^2
-    ∂L = NamedDimsArray{(:local_node_id,:ℝᴺ,)}(zeros(Float64,num_nodes,2))
-    ∂L1 = ∂LagrangeBasis_1D(deg,ξ[1])
-    ∂L2 = ∂LagrangeBasis_1D(deg,ξ[2])
-    n = 0
-    for j = 1:deg+1
-        for i = 1:deg+1
-            n += 1
-            ∂L[n,:] = [∂L1[i], ∂L2[j]]
-        end
-    end
-    return ∂L
+function ∇LagrangeBasis_2D(deg,ξ)
+    f(ξ) = LagrangeBasis_2D(deg,ξ)
+    ∇f = ForwardDiff.jacobian(ξ->f(ξ),ξ)
+    return ∇f
 end
 
-function ∂LagrangeBasis_3D(deg,ξ)
-    num_nodes = (deg+1)^3
-    ∂L = NamedDimsArray{(:local_node_id,:ℝᴺ,)}(zeros(Float64,num_nodes,3))
-    ∂L1 = ∂LagrangeBasis_1D(deg,ξ[1])
-    ∂L2 = ∂LagrangeBasis_1D(deg,ξ[2])
-    ∂L3 = ∂LagrangeBasis_1D(deg,ξ[3])
-    n = 0
-    for k = 1:deg+1
-        for j = 1:deg+1
-            for i = 1:deg+1
-                n += 1
-                ∂L[n,:] = [∂L1[i], ∂L2[j], ∂L3[k]]
-            end
-        end
-    end
-    return ∂L
+function ∇LagrangeBasis_3D(deg,ξ)
+    f(ξ) = LagrangeBasis_3D(deg,ξ)
+    ∇f = ForwardDiff.jacobian(ξ->f(ξ),ξ)
+    return ∇f
 end
 
 function computeGeometricMapping(Nₐ, xₐ, ξ)
