@@ -162,3 +162,78 @@ end
         end
     end
 end
+
+# Test 1D Lagrange Basis Function
+@testset "1D Lagrange Basis Function" begin
+    @testset "Degree = 1" begin
+        degree = 1
+        numNodes = degree + 1
+        nodeCoords = [-1., 1.]
+        for n = 1:numNodes
+            @test LagrangeBasis_1D(degree, nodeCoords[n])[n] ≈ 1.0
+        end
+    end
+
+    @testset "Degree = 2" begin
+        degree = 2
+        numNodes = degree + 1
+        nodeCoords = [-1., 0., 1.]
+        for n = 1:numNodes
+            @test LagrangeBasis_1D(degree, nodeCoords[n])[n] ≈ 1.0
+        end
+    end
+end
+
+# Test 2D Lagrange Basis Function
+@testset "2D Lagrange Basis Function" begin
+    @testset "Degree = 1" begin
+        degree = 1
+        numNodes = (degree + 1) ^ 2
+        nodeCoords = [[-1., -1.], [1., -1.], [-1., 1.],[1., 1.]]
+        for n = 1:numNodes
+            @test LagrangeBasis_2D(degree, nodeCoords[n])[n] ≈ 1.0
+        end
+    end
+
+    @testset "Degree = 2" begin
+        degree = 2
+        numNodes = (degree + 1)^2
+        nodeCoords = [[-1., -1.], [0., -1.], [1., -1.], [-1., 0.],[0., 0.], [1., 0.], [-1., 1.], [0., 1.] ,[1., 1.]]
+        for n = 1:numNodes
+            @test LagrangeBasis_2D(degree, nodeCoords[n])[n] ≈ 1.0
+        end
+    end
+end
+
+# Test 3D Lagrange Basis Function
+@testset "3D Lagrange Basis Function" begin
+    @testset "Degree = 1" begin
+        degree = 1
+        numNodes = (degree + 1) ^ 3
+        nodeCoords = [[-1., -1., -1.], [1., -1., -1.], 
+                      [-1.,  1., -1.], [1.,  1., -1.], 
+                      [-1., -1.,  1.], [1., -1.,  1.], 
+                      [-1.,  1.,  1.], [1.,  1.,  1.]]
+        for n = 1:numNodes
+            @test LagrangeBasis_3D(degree, nodeCoords[n])[n] ≈ 1.0
+        end
+    end
+
+    @testset "Degree = 2" begin
+        degree = 2
+        numNodes = (degree + 1)^3
+        nodeCoords = [[-1., -1., -1.], [0., -1., -1.], [1., -1., -1.], 
+                      [-1.,  0., -1.], [0.,  0., -1.], [1.,  0., -1.],
+                      [-1.,  1., -1.], [0.,  1., -1.], [1.,  1., -1.],
+                      [-1., -1.,  0.], [0., -1.,  0.], [1., -1.,  0.], 
+                      [-1.,  0.,  0.], [0.,  0.,  0.], [1.,  0.,  0.],
+                      [-1.,  1.,  0.], [0.,  1.,  0.], [1.,  1.,  0.],
+                      [-1., -1.,  1.], [0., -1.,  1.], [1., -1.,  1.], 
+                      [-1.,  0.,  1.], [0.,  0.,  1.], [1.,  0.,  1.],
+                      [-1.,  1.,  1.], [0.,  1.,  1.], [1.,  1.,  1.]]
+        for n = 1:numNodes
+            @test LagrangeBasis_3D(degree, nodeCoords[n])[n] ≈ 1.0
+        end
+    end
+end
+
