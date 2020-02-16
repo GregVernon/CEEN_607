@@ -88,6 +88,8 @@ function GaussQuadratureRule_3D(nPts)
 end
 
 function LagrangeBasis_1D(deg, ξ)
+    ξ = ξ[1]
+    L = NamedDimsArray{(:local_node_id,)}(zeros(Float64,(deg+1)))
     if deg == 1
         L = [(1-ξ)/2, (1+ξ)/2]
         return L
