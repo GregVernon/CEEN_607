@@ -3,6 +3,7 @@ import Base.≈
 ≈(a::Float64,b::Float64) = isapprox(a::Float64,b::Float64;atol=10*eps(),rtol=10*eps())
 
 include("feCode.jl")
+include("feElement.jl")
 
 # Test 1D Guass Quadrature
 @testset "1D Guass Quadrature" begin
@@ -237,3 +238,90 @@ end
     end
 end
 
+@testset "Nodal Coordinates" begin
+    @testset "Dimension = 1" begin
+        @testset "Degree = 1" begin
+            deg = 1
+            nodeCoords = [-1., 1.]
+            @test buildLocalNodeCoordinates_1D(deg) ≈ nodeCoords
+        end
+
+        @testset "Degree = 2" begin
+            deg = 2
+            nodeCoords = [-1., 0., 1.]
+            @test buildLocalNodeCoordinates_1D(deg) ≈ nodeCoords
+        end
+    end
+
+    @testset "Dimension = 2" begin
+        @testset "Degree = 1" begin
+            deg = 1
+            nodeCoords = [-1. -1.;
+                           1. -1.;
+                          -1.  1.;
+                           1.  1.]
+            @test buildLocalNodeCoordinates_2D(deg) ≈ nodeCoords
+        end
+
+        @testset "Degree = 2" begin
+            deg = 2
+            nodeCoords = [-1. -1.;
+                           0. -1.;
+                           1. -1.;
+                          -1.  0.;
+                           0.  0.;
+                           1.  0.;
+                          -1.  1.;
+                           0.  1.;
+                           1.  1.]
+            @test buildLocalNodeCoordinates_2D(deg) ≈ nodeCoords
+        end
+    end
+    
+    @testset "Dimension = 3" begin
+        @testset "Degree = 1" begin
+            deg = 1
+            nodeCoords = [-1. -1. -1.; 
+                           1. -1. -1.; 
+                          -1.  1. -1.;
+                           1.  1. -1.; 
+                          -1. -1.  1.;
+                           1. -1.  1.; 
+                          -1.  1.  1.;
+                           1.  1.  1.]
+            @test buildLocalNodeCoordinates_3D(deg) ≈ nodeCoords
+        end
+
+        @testset "Degree = 2" begin
+            deg = 2
+            nodeCoords = [-1. -1. -1.; 
+                           0. -1. -1.;
+                           1. -1. -1.;
+                          -1.  0. -1.;
+                           0.  0. -1.;
+                           1.  0. -1.;
+                          -1.  1. -1.;
+                           0.  1. -1.;
+                           1.  1. -1.;
+                          -1. -1.  0.;
+                           0. -1.  0.;
+                           1. -1.  0.;
+                          -1.  0.  0.;
+                           0.  0.  0.;
+                           1.  0.  0.;
+                          -1.  1.  0.;
+                           0.  1.  0.;
+                           1.  1.  0.;
+                          -1. -1.  1.;
+                           0. -1.  1.;
+                           1. -1.  1.;
+                          -1.  0.  1.;
+                           0.  0.  1.;
+                           1.  0.  1.;
+                          -1.  1.  1.;
+                           0.  1.  1.;
+                           1.  1.  1.]
+            @test buildLocalNodeCoordinates_3D(deg) ≈ nodeCoords
+        end
+    end
+end
