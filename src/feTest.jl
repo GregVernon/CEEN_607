@@ -409,6 +409,169 @@ end
     end
 end
 
+@testset "Jacobian of Geometric Mapping" begin
+    @testset "Dimension = 1" begin
+        @testset "Degree = 1" begin
+            degree = 1
+            ∇Nₐ = ξ->∇LagrangeBasis_1D(degree,ξ)
+            xₐ = buildLocalNodeCoordinates_1D(degree)
+            for n = 1:10
+                ξ = 2*rand(1) .- 1
+                @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(LinearAlgebra.I(1))
+            end
+        end
+
+        @testset "Degree = 2" begin
+            degree = 2
+            ∇Nₐ = ξ->∇LagrangeBasis_1D(degree,ξ)
+
+            xₐ = buildLocalNodeCoordinates_1D(degree)
+            for n = 1:10
+                ξ = 2*rand(1) .- 1
+                @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(LinearAlgebra.I(1))
+            end
+
+            xₐ = 2 * buildLocalNodeCoordinates_1D(degree)
+            for n = 1:10
+                ξ = 2*(2*rand(1) .- 1)
+                @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ 2 * NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(LinearAlgebra.I(1))
+            end
+
+            xₐ = 2 .+ buildLocalNodeCoordinates_1D(degree)
+            for n = 1:10
+                ξ = 2 .+ (2*rand(1) .- 1)
+                @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(LinearAlgebra.I(1))
+            end
+
+            xₐ = 2 .+ (2*buildLocalNodeCoordinates_1D(degree))
+            for n = 1:10
+                ξ = 2 .+ 2*(2*rand(1) .- 1)
+                @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ 2 * NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(LinearAlgebra.I(1))
+            end
+        end
+    end
+
+    @testset "Dimension = 2" begin
+        @testset "Degree = 1" begin
+            degree = 1
+            ∇Nₐ = ξ->∇LagrangeBasis_2D(degree,ξ)
+            
+            xₐ = buildLocalNodeCoordinates_2D(degree)
+            for n = 1:10
+                ξ = 2*rand(2) .- 1
+                @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(LinearAlgebra.I(2))
+            end
+            
+            xₐ = 2 .* buildLocalNodeCoordinates_2D(degree)
+            for n = 1:10
+                ξ = 2*(2*rand(2) .- 1)
+                @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ 2 * NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(LinearAlgebra.I(2))
+            end
+            
+            xₐ = 2 .+ buildLocalNodeCoordinates_2D(degree)
+            for n = 1:10
+                ξ = 2 .+ (2*rand(2) .- 1)
+                @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(LinearAlgebra.I(2))
+            end
+            
+            xₐ = 2 .+ (2*buildLocalNodeCoordinates_2D(degree))
+            for n = 1:10
+                ξ = 2 .+ 2*(2*rand(2) .- 1)
+                @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ 2 * NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(LinearAlgebra.I(2))
+            end
+        end
+
+        @testset "Degree = 2" begin
+            degree = 2
+            ∇Nₐ = ξ->∇LagrangeBasis_2D(degree,ξ)
+            
+            xₐ = buildLocalNodeCoordinates_2D(degree)
+            for n = 1:10
+                ξ = 2*rand(2) .- 1
+                @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(LinearAlgebra.I(2))
+            end
+            
+            xₐ = 2 .* buildLocalNodeCoordinates_2D(degree)
+            for n = 1:10
+                ξ = 2*(2*rand(2) .- 1)
+                @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ 2 * NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(LinearAlgebra.I(2))
+            end
+            
+            xₐ = 2 .+ buildLocalNodeCoordinates_2D(degree)
+            for n = 1:10
+                ξ = 2 .+ (2*rand(2) .- 1)
+                @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(LinearAlgebra.I(2))
+            end
+            
+            xₐ = 2 .+ (2*buildLocalNodeCoordinates_2D(degree))
+            for n = 1:10
+                ξ = 2 .+ 2*(2*rand(2) .- 1)
+                @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ 2 * NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(LinearAlgebra.I(2))
+            end
+        end
+    end
+
+    @testset "Dimension = 3" begin
+        @testset "Degree = 1" begin
+            degree = 1
+            ∇Nₐ = ξ->∇LagrangeBasis_3D(degree,ξ)
+            
+            xₐ = buildLocalNodeCoordinates_3D(degree)
+            for n = 1:10
+                ξ = 2*rand(3) .- 1
+                @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(LinearAlgebra.I(3))
+            end
+
+            xₐ = 2. * buildLocalNodeCoordinates_3D(degree)
+            for n = 1:10
+                ξ = 2*(2*rand(3) .- 1)
+                @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ 2 * NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(LinearAlgebra.I(3))
+            end
+
+            xₐ = 2. .+ buildLocalNodeCoordinates_3D(degree)
+            for n = 1:10
+                ξ = 2 .+ (2*rand(3) .- 1)
+                @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(LinearAlgebra.I(3))
+            end
+
+            xₐ = 2. .+ (2*buildLocalNodeCoordinates_3D(degree))
+            for n = 1:10
+                ξ = 2 .+ 2*((2*rand(3) .- 1))
+                @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ 2 * NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(LinearAlgebra.I(3))
+            end
+        end
+
+        @testset "Degree = 2" begin
+            degree = 2
+            ∇Nₐ = ξ->∇LagrangeBasis_3D(degree,ξ)
+
+            xₐ = buildLocalNodeCoordinates_3D(degree)
+            for n = 1:10
+                ξ = 2*rand(3) .- 1
+                @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(LinearAlgebra.I(3))
+            end
+
+            xₐ = 2. * buildLocalNodeCoordinates_3D(degree)
+            for n = 1:10
+                ξ = 2*(2*rand(3) .- 1)
+                @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ 2 * NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(LinearAlgebra.I(3))
+            end
+
+            xₐ = 2. .+ buildLocalNodeCoordinates_3D(degree)
+            for n = 1:10
+                ξ = 2 .+ (2*rand(3) .- 1)
+                @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(LinearAlgebra.I(3))
+            end
+
+            xₐ = 2. .+ (2*buildLocalNodeCoordinates_3D(degree))
+            for n = 1:10
+                ξ = 2 .+ 2*((2*rand(3) .- 1))
+                @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ 2 * NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(LinearAlgebra.I(3))
+            end
+        end
+    end
+end
+
 @testset "Nodal Coordinates" begin
     @testset "Dimension = 1" begin
         @testset "Degree = 1" begin
