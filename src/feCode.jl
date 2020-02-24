@@ -171,6 +171,6 @@ function compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
             end
         end
     end
-    return J
+    return transpose(Jᵢⱼ)
 end
 
