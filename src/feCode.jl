@@ -174,6 +174,11 @@ function compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
     return transpose(Jᵢⱼ)
 end
 
+function compute∇ₓNₐ(∇Nₐ, Jᵢⱼ)
+    ∇ₓNₐ = ∇Nₐ * inv(Jᵢⱼ)
+    return ∇ₓNₐ
+end
+
 function computeIntegralScaling_2D(Jᵢⱼ, sideID)
     if sideID == 0
         scaleFactor = LinearAlgebra.det(Jᵢⱼ)  

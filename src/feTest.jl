@@ -710,6 +710,85 @@ end
     end
 end
 
+@testset "Change of Coordinates" begin
+    @testset "Dimension = 1" begin
+        @testset "Degree = 1" begin
+            degree = 1
+            ∇Nₐ = ξ->∇LagrangeBasis_1D(degree,ξ)
+            
+            xₐ = buildLocalNodeCoordinates_1D(degree)
+            Jᵢⱼ = ξ->compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
+            ξ = [0.0]
+            ∇ₓNₐ = compute∇ₓNₐ(∇Nₐ(ξ), Jᵢⱼ(ξ))
+            @test ∇ₓNₐ ≈ ∇Nₐ(ξ)
+        end
+        @testset "Degree = 2" begin
+            degree = 2
+            ∇Nₐ = ξ->∇LagrangeBasis_1D(degree,ξ)
+
+            xₐ = buildLocalNodeCoordinates_1D(degree)
+            Jᵢⱼ = ξ->compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
+            ξ = [0.0]
+            ∇ₓNₐ = compute∇ₓNₐ(∇Nₐ(ξ), Jᵢⱼ(ξ))
+            @test ∇ₓNₐ ≈ ∇Nₐ(ξ)
+        end
+    end
+
+    @testset "Dimension = 2" begin
+        @testset "Degree = 1" begin
+            degree = 1
+            ∇Nₐ = ξ->∇LagrangeBasis_2D(degree,ξ)
+            
+            # Identity
+            xₐ = buildLocalNodeCoordinates_2D(degree)
+            Jᵢⱼ = ξ->compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
+            ξ = [0.0, 0.0]
+            ∇ₓNₐ = compute∇ₓNₐ(∇Nₐ(ξ), Jᵢⱼ(ξ))
+            @test ∇ₓNₐ ≈ ∇Nₐ(ξ)
+
+            # Scaling
+            A = affineTransformationMatrix_2D(scale=[2,2])
+            xₐ = buildLocalNodeCoordinates_2D(degree)
+            for n = 1:size(xₐ,:local_node_id)
+                xₐ[n,:] = (A * [xₐ[n,:]...,0.0])[1:2]
+            end
+            Jᵢⱼ = ξ->compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
+            ξ = [0.0, 0.0]
+            ∇ₓNₐ = compute∇ₓNₐ(∇Nₐ(ξ), Jᵢⱼ(ξ))
+            @test ∇ₓNₐ ≈ 1/2 * ∇Nₐ(ξ)
+        end
+        @testset "Degree = 2" begin
+            degree = 2
+            ∇Nₐ = ξ->∇LagrangeBasis_2D(degree,ξ)
+            
+            # Identity
+            xₐ = buildLocalNodeCoordinates_2D(degree)
+            Jᵢⱼ = ξ->compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
+            ξ = [0.0, 0.0]
+            ∇ₓNₐ = compute∇ₓNₐ(∇Nₐ(ξ), Jᵢⱼ(ξ))
+            @test ∇ₓNₐ ≈ ∇Nₐ(ξ)
+
+            # Scaling
+            A = affineTransformationMatrix_2D(scale=[2,2])
+            xₐ = buildLocalNodeCoordinates_2D(degree)
+            for n = 1:size(xₐ,:local_node_id)
+                xₐ[n,:] = (A * [xₐ[n,:]...,0.0])[1:2]
+            end
+            Jᵢⱼ = ξ->compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
+            ξ = [0.0, 0.0]
+            ∇ₓNₐ = compute∇ₓNₐ(∇Nₐ(ξ), Jᵢⱼ(ξ))
+            @test ∇ₓNₐ ≈ 1/2 * ∇Nₐ(ξ)
+        end
+    end
+
+    @testset "Dimension = 3" begin
+        @testset "Degree = 1" begin
+        end
+        @testset "Degree = 2" begin
+        end
+    end
+end
+
 @testset "Nodal Coordinates" begin
     @testset "Dimension = 1" begin
         @testset "Degree = 1" begin
