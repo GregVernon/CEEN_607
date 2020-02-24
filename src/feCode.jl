@@ -174,3 +174,17 @@ function compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
     return transpose(Jᵢⱼ)
 end
 
+function computeBoundaryNormals(Jᵢⱼ, sideID)
+    if sideID == 0
+        ñ = undef
+    elseif sideID == 1
+        ñ = 1/LinearAlgebra.norm(LinearAlgebra.cross([0,0,1], [Jᵢⱼ[:,2]..., 0.0])) * (LinearAlgebra.cross([0,0,1], [Jᵢⱼ[:,2]..., 0.0]))
+    elseif sideID == 2
+        ñ = 1/LinearAlgebra.norm(LinearAlgebra.cross([Jᵢⱼ[:,2]..., 0.0], [0,0,1])) * (LinearAlgebra.cross([Jᵢⱼ[:,2]..., 0.0], [0,0,1]))
+    elseif sideID == 3
+        ñ = 1/LinearAlgebra.norm(LinearAlgebra.cross([Jᵢⱼ[:,1]..., 0.0], [0,0,1])) * (LinearAlgebra.cross([Jᵢⱼ[:,1]..., 0.0], [0,0,1]))
+    elseif sideID == 4
+        ñ = 1/LinearAlgebra.norm(LinearAlgebra.cross([0,0,1], [Jᵢⱼ[:,1]..., 0.0])) * (LinearAlgebra.cross([0,0,1], [Jᵢⱼ[:,1]..., 0.0]))
+    end
+    return ñ
+end

@@ -4,6 +4,7 @@ import Base.≈
 
 include("feCode.jl")
 include("feElement.jl")
+include("feUtility.jl")
 
 # Test 1D Guass Quadrature
 @testset "1D Guass Quadrature" begin
@@ -567,6 +568,108 @@ end
             for n = 1:10
                 ξ = 2 .+ 2*((2*rand(3) .- 1))
                 @test compute∇GeometricMapping(∇Nₐ, xₐ, ξ) ≈ 2 * NamedDimsArray{(:ℝᴺ,:ℙᴺ,)}(LinearAlgebra.I(3))
+            end
+        end
+    end
+end
+
+@testset "Boundary Normal" begin
+    @testset "Dimension = 2" begin
+        @testset "Degree = 1" begin
+            degree = 1
+            xₐ = buildLocalNodeCoordinates_2D(degree)
+            ∇Nₐ = ξ->∇LagrangeBasis_2D(degree,ξ)
+            Jᵢⱼ = ξ->compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
+            for sideID = 1:4
+                if     sideID == 1
+                    ξ = [-1.0, 0.0]
+                    ñ = [-1.0, 0.0, 0.0]
+                elseif sideID == 2
+                    ξ = [+1.0, 0.0]
+                    ñ = [+1.0, 0.0, 0.0]
+                elseif sideID == 3
+                    ξ = [0.0, -1.0]
+                    ñ = [0.0, -1.0, 0.0]
+                else   sideID == 4
+                    ξ = [0.0, +1.0]
+                    ñ = [0.0, +1.0, 0.0]
+                end
+                n = computeBoundaryNormals(Jᵢⱼ(ξ), sideID)
+                @test n ≈ ñ
+            end
+
+            A = affineTransformationMatrix_2D(rotate=pi/4)
+            xₐ = buildLocalNodeCoordinates_2D(degree)
+            for n = 1:size(xₐ,:local_node_id)
+                xₐ[n,:] = (A * [xₐ[n,:]...,0.0])[1:2]
+            end
+            ∇Nₐ = ξ->∇LagrangeBasis_2D(degree,ξ)
+            Jᵢⱼ = ξ->compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
+            for sideID = 1:4
+                if     sideID == 1
+                    ξ = [-1.0, 0.0]
+                    ñ = [-√2/2, -√2/2, 0.0]
+                elseif sideID == 2
+                    ξ = [+1.0, 0.0]
+                    ñ = [+√2/2, +√2/2, 0.0]
+                elseif sideID == 3
+                    ξ = [0.0, -1.0]
+                    ñ = [+√2/2, -√2/2, 0.0]
+                else   sideID == 4
+                    ξ = [0.0, +1.0]
+                    ñ = [-√2/2, +√2/2, 0.0]
+                end
+                n = computeBoundaryNormals(Jᵢⱼ(ξ), sideID)
+                @test n ≈ ñ
+            end
+        end
+
+        @testset "Degree = 2" begin
+            degree = 2
+            xₐ = buildLocalNodeCoordinates_2D(degree)
+            ∇Nₐ = ξ->∇LagrangeBasis_2D(degree,ξ)
+            Jᵢⱼ = ξ->compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
+            for sideID = 1:4
+                if     sideID == 1
+                    ξ = [-1.0, 0.0]
+                    ñ = [-1.0, 0.0, 0.0]
+                elseif sideID == 2
+                    ξ = [+1.0, 0.0]
+                    ñ = [+1.0, 0.0, 0.0]
+                elseif sideID == 3
+                    ξ = [0.0, -1.0]
+                    ñ = [0.0, -1.0, 0.0]
+                else   sideID == 4
+                    ξ = [0.0, +1.0]
+                    ñ = [0.0, +1.0, 0.0]
+                end
+                n = computeBoundaryNormals(Jᵢⱼ(ξ), sideID)
+                @test n ≈ ñ
+            end
+
+            A = affineTransformationMatrix_2D(rotate=pi/4)
+            xₐ = buildLocalNodeCoordinates_2D(degree)
+            for n = 1:size(xₐ,:local_node_id)
+                xₐ[n,:] = (A * [xₐ[n,:]...,0.0])[1:2]
+            end
+            ∇Nₐ = ξ->∇LagrangeBasis_2D(degree,ξ)
+            Jᵢⱼ = ξ->compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
+            for sideID = 1:4
+                if     sideID == 1
+                    ξ = [-1.0, 0.0]
+                    ñ = [-√2/2, -√2/2, 0.0]
+                elseif sideID == 2
+                    ξ = [+1.0, 0.0]
+                    ñ = [+√2/2, +√2/2, 0.0]
+                elseif sideID == 3
+                    ξ = [0.0, -1.0]
+                    ñ = [+√2/2, -√2/2, 0.0]
+                else   sideID == 4
+                    ξ = [0.0, +1.0]
+                    ñ = [-√2/2, +√2/2, 0.0]
+                end
+                n = computeBoundaryNormals(Jᵢⱼ(ξ), sideID)
+                @test n ≈ ñ
             end
         end
     end
