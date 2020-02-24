@@ -675,6 +675,41 @@ end
     end
 end
 
+@testset "Integral Scaling" begin
+    @testset "2D Element" begin
+        @testset "Degree = 1" begin
+            degree = 1
+            xₐ = buildLocalNodeCoordinates_2D(degree)
+            ∇Nₐ = ξ->∇LagrangeBasis_2D(degree,ξ)
+            Jᵢⱼ = ξ->compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
+            @testset "Body" begin
+                sideID = 0
+                ξ = [0.0, 0.0]
+                IntScale = computeIntegralScaling_2D(Jᵢⱼ(ξ), sideID)
+                @test IntScale ≈ 1.0
+            end
+            @testset "Sides" begin
+                for sideID = 1:4
+                    if     sideID == 1
+                        ξ = [-1.0, 0.0]
+                        IntScale = computeIntegralScaling_2D(Jᵢⱼ(ξ), sideID)
+                    elseif sideID == 2
+                        ξ = [+1.0, 0.0]
+                        IntScale = computeIntegralScaling_2D(Jᵢⱼ(ξ), sideID)
+                    elseif sideID == 3
+                        ξ = [0.0, -1.0]
+                        IntScale = computeIntegralScaling_2D(Jᵢⱼ(ξ), sideID)
+                    elseif sideID == 4
+                        ξ = [0.0, +1.0]
+                        IntScale = computeIntegralScaling_2D(Jᵢⱼ(ξ), sideID)
+                    end
+                    @test IntScale ≈ 1.0
+                end
+            end
+        end
+    end
+end
+
 @testset "Nodal Coordinates" begin
     @testset "Dimension = 1" begin
         @testset "Degree = 1" begin

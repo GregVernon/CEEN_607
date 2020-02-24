@@ -174,6 +174,17 @@ function compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
     return transpose(Jᵢⱼ)
 end
 
+function computeIntegralScaling_2D(Jᵢⱼ, sideID)
+    if sideID == 0
+        scaleFactor = LinearAlgebra.det(Jᵢⱼ)  
+    elseif sideID == 1 || sideID == 2
+        scaleFactor = LinearAlgebra.norm(Jᵢⱼ[:,2])
+    elseif sideID == 3 || sideID == 4
+        scaleFactor = LinearAlgebra.norm(Jᵢⱼ[:,1])
+    end
+    return scaleFactor
+end
+
 function computeBoundaryNormals(Jᵢⱼ, sideID)
     if sideID == 0
         ñ = undef
