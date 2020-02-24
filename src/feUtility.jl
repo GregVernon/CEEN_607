@@ -21,8 +21,8 @@ function affineTransformationMatrix_2D(;translate="TranslateVector",scale="Scale
     if typeof(scale) == String
         nothing
     else
-        ScaleMatrix[1,1] = scale[1] - 1.0
-        ScaleMatrix[2,2] = scale[2] - 1.0
+        ScaleMatrix[1,1] = scale[1]
+        ScaleMatrix[2,2] = scale[2]
     end
 
     # Rotation Matrix
