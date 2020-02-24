@@ -162,12 +162,12 @@ function compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
     num_nodes = size(xₐ,:local_node_id)
     num_par_dim = length(ξ)
     num_cart_dim = size(xₐ,:ℝᴺ)
-    J = NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(zeros(Float64,length(ξ),num_cart_dim))
+    Jᵢⱼ = NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(zeros(Float64,length(ξ),num_cart_dim))
 
     for n = 1:num_nodes
         for j = 1:num_par_dim
             for i = 1:num_cart_dim
-                J[j,i] += ∇Nₐ(ξ)[n,j] * xₐ[n,i] 
+                Jᵢⱼ[j,i] += ∇Nₐ(ξ)[n,j] * xₐ[n,i] 
             end
         end
     end
