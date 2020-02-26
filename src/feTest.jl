@@ -789,6 +789,23 @@ end
     end
 end
 
+@testset "Newton-Raphson" begin
+    @testset "1-D Linear" begin
+        x̄ = newton_raphson(x->2-x, x->1, 10., 1, 1, 1e-12) 
+        @test x̄ ≈ 2.0
+    end
+
+    @testset "1-D Quadratic" begin
+        x̄ = newton_raphson(x->2-x^2, x->2*x, 10., 10, 10, 1e-12) 
+        @test x̄ ≈ √2.0
+    end
+
+    @testset "1-D Cubic" begin
+        x̄ = newton_raphson(x->2-x^3, x->3*x^2, 10., 10, 10, 1e-12) 
+        @test x̄ ≈ (2.0)^(1/3)
+    end
+end
+
 @testset "Nodal Coordinates" begin
     @testset "Dimension = 1" begin
         @testset "Degree = 1" begin

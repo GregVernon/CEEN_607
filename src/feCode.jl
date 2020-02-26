@@ -204,3 +204,31 @@ function computeBoundaryNormals(Jᵢⱼ, sideID)
     end
     return ñ
 end
+
+function newton_raphson(ResidualFun, TangentFun, u₀, max_nl_step, max_newton_iter, ε) 
+    nl_step = 0
+    uₙ = u₀
+    while nl_step < max_nl_step
+        nl_step += 1
+        newton_iter = 0
+        R₀ = ResidualFun(uₙ)
+        uᵢ = uₙ
+        while newton_iter < max_newton_iter
+            newton_iter += 1
+           
+            Rᵢ = ResidualFun(uᵢ)
+
+            if LinearAlgebra.norm(Rᵢ) < ε*(LinearAlgebra.norm(R₀)) 
+                break
+            end
+
+            K = TangentFun(uᵢ)
+
+            Δu = K \ Rᵢ
+            uᵢ += Δu
+        end
+        uₙ = uᵢ
+    end
+    uₛ = uₙ
+    return uₛ
+end
