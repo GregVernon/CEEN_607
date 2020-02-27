@@ -5,6 +5,7 @@ import Base.≈
 include("feCode.jl")
 include("feElement.jl")
 include("feUtility.jl")
+include("feMeshGenerate.jl")
 
 # Test 1D Guass Quadrature
 @testset "1D Guass Quadrature" begin
@@ -890,6 +891,32 @@ end
                            0.  1.  1.;
                            1.  1.  1.]
             @test buildLocalNodeCoordinates_3D(deg) ≈ nodeCoords
+        end
+    end
+end
+
+@testset "2D Mesh Generation" begin
+    @testset "1x1 Element" begin
+    end
+
+    @testset "2x2 Element" begin
+        MeshData = generateMesh_2DTensorProduct([0., 1., 0., 1.],2,2,1,"2x2_mesh")
+        for e = 1:4
+            if e == 1
+                A = affineTransformationMatrix_2D(scale=[0.25,0.25],translate=[0.25,0.25])
+            elseif e == 2
+                A = affineTransformationMatrix_2D(scale=[0.25,0.25],translate=[0.75,0.25])
+            elseif e == 3
+                A = affineTransformationMatrix_2D(scale=[0.25,0.25],translate=[0.25,0.75])
+            elseif e == 4
+                A = affineTransformationMatrix_2D(scale=[0.25,0.25],translate=[0.75,0.75])
+            end
+            xₐ = buildLocalNodeCoordinates_2D(1)
+            for n = 1:size(xₐ,1)
+                xₐ[n,:] = (A * [xₐ[n,:]..., 1.0])[1:2]
+            end
+            NodeCoords = buildGlobalNodeCoordinateArray(MeshData.Nodes)
+            @test NodeCoords[MeshData.Elements[e].ChildNodes,:] ≈ collect(xₐ)
         end
     end
 end
