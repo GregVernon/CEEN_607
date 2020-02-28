@@ -1,5 +1,4 @@
 using NamedDims
-include("feDatastructure.jl")
 
 function buildGlobalNodeCoordinateArray(NODES)
     # Get global information about the Genesis file

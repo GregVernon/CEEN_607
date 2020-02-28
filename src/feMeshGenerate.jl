@@ -1,6 +1,3 @@
-include("feDatastructure.jl")
-include("feMeshImport.jl")
-
 function generateMesh_2DTensorProduct(xyBounds,NX,NY,degree,outname)
     xmin = xyBounds[1]
     xmax = xyBounds[2]

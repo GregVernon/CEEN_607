@@ -1,6 +1,4 @@
 import NCDatasets
-include("feMesh.jl")
-include("feDatastructure.jl")
 
 function importGenesis(filename)
     G = NCDatasets.Dataset(filename,"r")
