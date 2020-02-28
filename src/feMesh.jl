@@ -111,6 +111,27 @@ function buildDOFConstraintValueArray(NODES,NODESETS)
     return DOFConstraintValue
 end
 
+function buildLoadTypeArray(ELEMS,SURFACESETS)
+    num_surfacesets = length(SURFACESETS)
+    num_elems = length(ELEMS)
+    num_loc_sides = length(ELEMS[1].SideNodes)
+    LoadTypeArray = NamedDimsArray{(:local_side_id, :global_elem_id,)}(Array{Any,2}(fill(nothing,num_loc_sides,num_elems)))
+    for ss = 1:num_surfacesets
+        if isempty(SURFACESETS[ss].LC_Type) == false
+            for e = 1:length(SURFACESETS[ss].ChildElements)
+                if SURFACESETS[ss].LC_Type == feEnumerate.body
+                    LoadTypeArray[1,SURFACESETS[ss].ChildElements[e]] = feEnumerate.body
+                else
+                    for i = 1:length(SURFACESETS[ss].LC_Type)
+                        LoadTypeArray[SURFACESETS[ss].ChildElements_LocalFace[i] + 1, SURFACESETS[ss].ChildElements[e]] = SURFACESETS[ss].LC_Type[i]
+                    end
+                end
+            end
+        end
+    end
+    return LoadTypeArray
+end
+
 function buildElementQuadrature(ELEMS)
     num_elems = length(ELEMS)
     for e = 1:num_elems
