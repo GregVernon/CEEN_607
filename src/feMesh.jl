@@ -76,6 +76,41 @@ function buildConstrainedDOFList(NODES, NS)
     return isConstrainedGDOF
 end
 
+function buildDOFConstraintTypeArray(NODES,NODESETS)
+    num_nodesets = length(NODESETS)
+    num_nodes = length(NODES)
+    num_loc_dof = length(NODES[1].ChildDOFS)
+
+    DOFConstraintType = NamedDimsArray{(:global_node_id,:local_dof_id,)}([feEnumerate.unconstrained for i = 1:num_loc_dof, j=1:num_nodes])
+    for ns = 1:num_nodesets
+        if isempty(NODESETS[ns].BC_Type) == false
+            for n = 1:length(NODESETS[ns].ChildNodes)
+                for i = 1:length(NODESETS[ns].BC_DOF)
+                    DOFConstraintType[NODESETS[ns].BC_DOF[i], NODESETS[ns].ChildNodes[n]] = NODESETS[ns].BC_Type[i]
+                end
+            end
+        end
+    end
+    return DOFConstraintType
+end
+
+function buildDOFConstraintValueArray(NODES,NODESETS)
+    num_nodesets = length(NODESETS)
+    num_nodes = length(NODES)
+    num_loc_dof = length(NODES[1].ChildDOFS)
+    DOFConstraintValue = NamedDimsArray{(:global_node_id,:local_dof_id,)}(Array{Any,2}(fill(nothing,num_loc_dof,num_nodes)))
+    for ns = 1:num_nodesets
+        if isempty(NODESETS[ns].BC_Type) == false
+            for n = 1:length(NODESETS[ns].ChildNodes)
+                for i = 1:length(NODESETS[ns].BC_DOF)
+                    DOFConstraintValue[NODESETS[ns].BC_DOF[i], NODESETS[ns].ChildNodes[n]] = NODESETS[ns].BC_Value[i]
+                end
+            end
+        end
+    end
+    return DOFConstraintValue
+end
+
 function buildElementQuadrature(ELEMS)
     num_elems = length(ELEMS)
     for e = 1:num_elems
