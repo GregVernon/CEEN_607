@@ -31,7 +31,12 @@ end
 
 mutable struct feNodeSet
     ChildNodes
-    Variate
+    LC_Type
+    LC_Direction
+    LC_Magnitude
+    BC_Type
+    BC_DOF
+    BC_Value
     Name::String
     feNodeSet() = new()
 end
