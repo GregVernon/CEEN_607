@@ -293,6 +293,15 @@ function setElementNodeTypes(ELEMS,NODES)
                 ELEMS[e].InternalNodes[n] = gnID
             end
         end
+        RefElem = makeExodusElement(ELEMS[e].ElementFamily)
+        ELEMS[e].SideNodes = NamedDimsArray{(:local_side_id,)}(Array{Any,1}(undef, size(RefElem.FaceNodeOrder,1)+1))
+        for side_id = 0:size(RefElem.FaceNodeOrder,1)
+            if side_id == 0
+                ELEMS[e].SideNodes[side_id+1] = ELEMS[e].ChildNodes 
+            else
+                ELEMS[e].SideNodes[side_id+1] = ELEMS[e].ChildNodes[RefElem.FaceNodeOrder[side_id,:]]
+            end
+        end
     end
     
     return ELEMS
