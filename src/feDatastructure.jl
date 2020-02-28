@@ -52,16 +52,19 @@ mutable struct feNode
     feNode() = new()
 end
 
-mutable struct feQuadrature
-    Type::String
-    Points
-    Variate_Points
+mutable struct feQuadraturePoint
+    feQuadraturePoint() = new()
+    Coordinates
     Weights
-    Variate_Weights
     Nₐ
     ∇Nₐ
     ∇ₓNₐ
     Jᵢⱼ
+end
+
+mutable struct feQuadrature
+    Type::String
+    QuadraturePoints::NamedDimsArray{(:local_qp_id,)}
     feQuadrature() = new()
 end
 
@@ -76,9 +79,10 @@ mutable struct feElement
     NumVariates
     ElementFamily 
     FaceNodes 
+    SideNodes
     GlobalID 
     InternalNodes
-    Quadrature::feQuadrature
+    Quadrature::NamedDimsArray{(:local_side_id,)}
     NumNodes::Int
     feElement() = new()
 end
