@@ -242,7 +242,7 @@ end
 function assignNodeDOFS(NODES, num_dim)
     dofID = 0
     for n = 1:length(NODES)
-        NODES[n].ChildDOFS = zeros(Int64,num_dim)
+        NODES[n].ChildDOFS = NamedDimsArray{(:local_dof_id,)}(zeros(Int64,num_dim))
         for d = 1:num_dim
             dofID+=1
             NODES[n].ChildDOFS[d] = dofID
