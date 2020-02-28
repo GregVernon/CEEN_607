@@ -97,6 +97,7 @@ mutable struct MESH
     Nodes::NamedDimsArray{(:global_node_id,)}
     NodeSets::NamedDimsArray{(:global_nodeset_id,)}
     SurfaceSets::NamedDimsArray{(:global_surfaceset_id,)}
+    ElementSets::NamedDimsArray{(:global_elementset_id,)}
     MESH() = new()
 end
 
