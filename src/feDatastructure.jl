@@ -44,7 +44,7 @@ end
 mutable struct feNode
     Basis::String
     ParentElements 
-    Coordinates 
+    Coordinates::NamedDimsArray{(:ℝᴺ,)}
     isElementBoundaryNode::Bool
     isElementCornerNode::Bool
     isElementFaceNode::Bool
@@ -53,7 +53,7 @@ mutable struct feNode
     isMeshCornerNode::Bool
     isMeshFaceNode::Bool
     isMeshInternalNode::Bool
-    ChildDOFS
+    ChildDOFS::NamedDimsArray{(:local_dof_id,)}
     feNode() = new()
 end
 
