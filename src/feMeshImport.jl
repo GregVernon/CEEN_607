@@ -210,3 +210,68 @@ function initNodes(G,ELEM)
 
     return ELEM,NODES
 end
+
+function assignLoadConditions(GEOM, LC)
+    SS = GEOM.SurfaceSets
+    num_element_sets = length(GEOM.ElementSets)
+    num_surface_sets = length(GEOM.SurfaceSets)
+    num_load_conditions = length(LC)
+    # Set the applied loads for the surface sets
+    for n = 1:num_surface_sets
+        if isdefined(GEOM.SurfaceSets[n], :LC_Type) == false
+            GEOM.SurfaceSets[n].LC_Type = []
+            GEOM.SurfaceSets[n].LC_Direction = []
+            GEOM.SurfaceSets[n].LC_Magnitude = []
+        end
+        for m = 1:num_load_conditions
+            if LC[m].Type in [feEnumerate.pressure, feEnumerate.traction, feEnumerate.force]
+                if lowercase(GEOM.SurfaceSets[n].Name) == lowercase(LC[m].SurfaceSetName)
+                    push!(GEOM.SurfaceSets[n].LC_Type, LC[m].Type)
+                    append!(GEOM.SurfaceSets[n].LC_Direction, LC[m].Direction)
+                    append!(GEOM.SurfaceSets[n].LC_Magnitude, LC[m].Magnitude)
+                end
+            end
+        end
+    end
+
+    # Set the applied loads for the element sets
+    for n = 1:num_element_sets
+        if isdefined(GEOM.ElementSets[n], :LC_Type) == false
+            GEOM.ElementSets[n].LC_Type = []
+            GEOM.ElementSets[n].LC_Direction = []
+            GEOM.ElementSets[n].LC_Magnitude = []
+        end
+        for m = 1:num_load_conditions
+            if LC[m].Type in [feEnumerate.body]
+                if lowercase(GEOM.ElementSets[n].Name) == lowercase(LC[m].ElementSetName)
+                    push!(GEOM.ElementSets[n].LC_Type, LC[m].Type)
+                    append!(GEOM.ElementSets[n].LC_Direction, LC[m].Direction)
+                    append!(GEOM.ElementSets[n].LC_Magnitude, LC[m].Magnitude)
+                end
+            end
+        end
+    end
+
+    return GEOM
+end
+
+function assignBoundaryConditions(GEOM, BC)
+    num_node_sets = length(GEOM.NodeSets)
+    num_boundary_conditions = length(BC)
+    # Set the constrained DOF for the nodesets
+    for n = 1:num_node_sets
+        if isdefined(GEOM.NodeSets[n], :BC_Type) == false
+            GEOM.NodeSets[n].BC_Type = []
+            GEOM.NodeSets[n].BC_DOF = []
+            GEOM.NodeSets[n].BC_Value = []
+        end
+        for m = 1:num_boundary_conditions
+            if lowercase(GEOM.NodeSets[n].Name) == lowercase(BC[m].NodeSetName)
+                push!(GEOM.NodeSets[n].BC_Type, BC[m].Type)
+                append!(GEOM.NodeSets[n].BC_DOF, BC[m].DOF)
+                append!(GEOM.NodeSets[n].BC_Value, BC[m].Value)
+            end
+        end
+    end
+    return GEOM
+end
