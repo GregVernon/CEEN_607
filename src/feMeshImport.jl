@@ -16,15 +16,49 @@ function importGenesis(filename)
     
     NS = initNodeSets(G)
     SS = initSurfaceSets(G,ELEM)
-    
+    ES = initElementSets(G)
+
     GEOM = MESH()
     GEOM.Elements = ELEM
     GEOM.Nodes = NODES
     GEOM.NodeSets = NS
     GEOM.SurfaceSets = SS
+    GEOM.ElementSets = ES
 
     NCDatasets.close(G)
     return GEOM
+end
+
+function initElementSets(G)
+    # Get global information about the Genesis file
+    num_dim       = G.dim["num_dim"]
+    num_nodes     = G.dim["num_nodes"]
+    num_elem      = G.dim["num_elem"]
+    num_el_blk    = G.dim["num_el_blk"]
+    num_node_sets = G.dim["num_node_sets"]
+    num_side_sets = G.dim["num_side_sets"]
+
+    ES = NamedDimsArray{(:global_elementset_id,)}([feElementSet() for b = 1:num_el_blk])
+    num_last_elem = 0
+    for b = 1:num_el_blk
+        eb_name = join(["connect" string(b)])
+        num_elem_in_block = size(G[eb_name].var[:],2)
+        ES[b].ChildElements = collect([(num_last_elem+1) : (num_last_elem+num_elem_in_block)]...)
+        num_last_elem += num_elem_in_block
+        ES[b].ElementFamily = G[eb_name].attrib["elem_type"]
+    end
+
+    if "eb_names" in keys(G)
+        # Get the names of the surfacesets
+        eb_names = G["eb_names"].var[:]
+        for n = 1:num_el_blk
+            eb_name = eb_names[:,n]
+            eb_name = join(eb_name[eb_name .!= '\0'])
+            ES[n].Name = eb_name
+        end
+    end
+
+    return ES
 end
 
 function initSurfaceSets(G,ELEM)
@@ -90,15 +124,6 @@ function initNodeSets(G)
             ns_name = join(ns_name[ns_name .!= '\0'])
             NS[n].Name = ns_name
         end
-
-        # # Set the constrained DOF for the nodesets
-        # for n = 1:num_node_sets
-        #     for m = 1:num_node_sets
-        #         if lowercase(NS[n].Name) == lowercase(PARAMS.NodeSets[m].NodeSetName)
-        #             NS[n].ConstrainedDOF = PARAMS.NodeSets[m].DOF
-        #         end
-        #     end
-        # end
     end
 
     return NS

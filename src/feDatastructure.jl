@@ -2,6 +2,15 @@ using NamedDims
 
 mutable struct feElementSet
     ChildElements
+    Dimension 
+    NumVariates
+    ElementFamily 
+    LC_Type
+    LC_Direction
+    LC_Magnitude
+    BC_Type
+    BC_DOF
+    BC_Value
     Name::String
     feElementSet() = new()
 end
@@ -10,6 +19,12 @@ mutable struct feSurfaceSet
     ChildElements
     ChildElements_LocalFace
     ChildNodes
+    LC_Type
+    LC_Direction
+    LC_Magnitude
+    BC_Type
+    BC_DOF
+    BC_Value
     Name::String
     feSurfaceSet() = new()
 end
