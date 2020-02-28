@@ -43,6 +43,9 @@ function GaussQuadratureRule_1D(nPts)
     elseif nPts == 2
         ξ = NamedDimsArray{(:local_qp_id,)}([-1/sqrt(3), 1/sqrt(3)])
         W = NamedDimsArray{(:local_qp_id,)}([1., 1.,])
+    elseif nPts == 3
+        ξ = NamedDimsArray{(:local_qp_id,)}([-sqrt(3)/sqrt(5), 0., sqrt(3)/sqrt(5)])
+        W = NamedDimsArray{(:local_qp_id,)}([5/9, 8/9, 5/9])
     end
     return ξ,W
 end
