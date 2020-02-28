@@ -790,6 +790,33 @@ end
     end
 end
 
+@testset "Strain-Displacement" begin
+    @testset "2-D" begin
+        @testset "Degree = 1" begin
+            degree = 1
+            num_nodes = degree + 1
+            ∇Nₐ = ξ->∇LagrangeBasis_2D(degree,ξ)
+            ξ,W = GaussQuadratureRule_2D(2)
+            for a = 1:num_nodes
+                B = StrainDisplacement_2D(∇Nₐ(ξ[a,:]))
+                @test size(B) == (3,2)
+            end
+        end
+
+        @testset "Degree = 2" begin
+            degree = 2
+            num_nodes = degree + 1
+            ∇Nₐ = ξ->∇LagrangeBasis_2D(degree,ξ)
+            ξ,W = GaussQuadratureRule_2D(2)
+            for a = 1:num_nodes
+                B = StrainDisplacement_2D(∇Nₐ(ξ[a,:]))
+                @test size(B) == (3,2)
+            end
+        end
+    end
+
+end
+
 @testset "Newton-Raphson" begin
     @testset "1-D Linear" begin
         x̄ = newton_raphson(x->2-x, x->1, 10., 1, 1, 1e-12) 

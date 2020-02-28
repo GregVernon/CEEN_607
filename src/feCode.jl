@@ -182,6 +182,12 @@ function compute∇ₓNₐ(∇Nₐ, Jᵢⱼ)
     return ∇ₓNₐ
 end
 
+function StrainDisplacement_2D(∇Nₐ)
+    B = [∇Nₐ[1]  0.0;
+         0.0    ∇Nₐ[2];
+         ∇Nₐ[2] ∇Nₐ[1]]
+end
+
 function computeIntegralScaling_2D(Jᵢⱼ, sideID)
     if sideID == 0
         scaleFactor = LinearAlgebra.det(Jᵢⱼ)  
