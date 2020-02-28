@@ -2,10 +2,7 @@ using Test
 import Base.≈
 ≈(a::Float64,b::Float64) = isapprox(a::Float64,b::Float64;atol=10*eps(),rtol=10*eps())
 
-include("feCode.jl")
-include("feElement.jl")
-include("feUtility.jl")
-include("feMeshGenerate.jl")
+include("feHeader.jl")
 
 # Test 1D Guass Quadrature
 @testset "1D Guass Quadrature" begin
