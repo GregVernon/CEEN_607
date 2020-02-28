@@ -105,3 +105,40 @@ struct ExodusElement
     isFaceNode::NamedDimsArray{(:local_node_id,)}
     isInternalNode::NamedDimsArray{(:local_node_id,)}
 end
+
+################### Input Parameters ###################
+mutable struct InputParams
+    BoundaryConditions
+    LoadConditions
+    InputParams() = new()
+end
+
+mutable struct GeometryCard
+    Filename
+    GeometryCard() = new()
+end
+
+mutable struct BoundaryCondition
+    Type
+    NodeSetName
+    DOF
+    Value
+    BoundaryCondition() = new()
+end
+
+mutable struct LoadCondition
+    Type
+    ElementSetName
+    SurfaceSetName
+    Direction
+    Magnitude
+    LoadCondition() = new()
+end
+
+mutable struct BodyCondition
+    Type
+    ElementSetName
+    Value
+    BodyCondition() = new()
+end
+
