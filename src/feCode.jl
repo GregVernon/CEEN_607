@@ -255,6 +255,29 @@ function computeResidual(Δu, GEOM)
     return Residual
 end
 
+function applyBoundaryConditions(R̃, K̃, GEOM)
+    remove_dofs = Int[]
+    num_dof_per_node = length(GEOM.Nodes[1].ChildDOFS)
+    for ns_id = 1:length(GEOM.NodeSets)
+        if isempty(GEOM.NodeSets[ns_id].BC_Type) == false
+            for bc_id = 1:length(GEOM.NodeSets[ns_id].BC_Type)
+                bc_type = GEOM.NodeSets[ns_id].BC_Type[ns_id]
+                if Int(bc_type) == Int(feEnumerate.dirichlet)
+                    for n = 1:length(GEOM.NodeSets[ns_id].ChildNodes)
+                        local_dofs = (n-1) * num_dof_per_node .+ collect(1:num_dof_per_node)
+                        global_dofs = GEOM.Nodes[GEOM.NodeSets[ns_id].ChildNodes[n]].ChildDOFS
+                        append!(remove_dofs, global_dofs[GEOM.NodeSets[ns_id].BC_DOF[bc_id]])
+                    end
+                end
+            end
+        end
+    end
+    keep_dofs = setdiff(1:length(R̃), remove_dofs)
+    R̃ = R̃[keep_dofs]
+    K̃ = K̃[keep_dofs, keep_dofs]
+    return R̃, K̃, keep_dofs
+end
+
 function computeLocalInternalForceVector(Δu, ELEMS, NODES)
     num_elem = length(ELEMS)
     num_dof_per_node = length(NODES[1].ChildDOFS)
@@ -455,7 +478,7 @@ function assembleGlobalStiffnessMatrix(ELEMS,NODES)
 end
 
 
-function newton_raphson(ResidualFun, TangentFun, u₀, max_nl_step, max_newton_iter, ε) 
+function newton_raphson(ResidualFun, TangentFun, KnownConditionsFun, u₀, max_nl_step, max_newton_iter, ε) 
     nl_step = 0
     uₙ = u₀
     while nl_step < max_nl_step
@@ -465,17 +488,18 @@ function newton_raphson(ResidualFun, TangentFun, u₀, max_nl_step, max_newton_i
         uᵢ = uₙ
         while newton_iter < max_newton_iter
             newton_iter += 1
-
+            print("non-linear step: ", nl_step, " newton iteration: ", newton_iter)
             Rᵢ = ResidualFun(uᵢ)
-
             if LinearAlgebra.norm(Rᵢ) < ε*(LinearAlgebra.norm(R₀)) 
                 break
             end
+            println("  residual: ", LinearAlgebra.norm(Rᵢ))
 
             K = TangentFun(uᵢ)
+            Rᵢ, K, keep_dofs = KnownConditionsFun(Rᵢ, K)
 
             Δu = collect(K) \ collect(Rᵢ)
-            uᵢ += Δu  # Will need to replace with an "UpdateFun()"
+            uᵢ[keep_dofs] += Δu  # Will need to replace with an "UpdateFun()"
         end
         uₙ = uᵢ
     end

@@ -10,5 +10,6 @@ function feStructuralMechanics(inputFile)
     K̃ = u -> assembleGlobalStiffnessMatrix(GEOM.Elements, GEOM.Nodes)
     
     R̃ = u -> computeResidual(u, GEOM)
-    uₛ = newton_raphson(R̃, K̃, zeros(size(K̃(1),1)), 10, 10, 1e-5)
+    Ã = (R̃, K̃) -> applyBoundaryConditions(R̃, K̃, GEOM)
+    uₛ = newton_raphson(R̃, K̃, Ã, zeros(size(K̃(1),1)), 10, 10, 1e-5)
 end
