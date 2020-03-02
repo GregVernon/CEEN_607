@@ -39,6 +39,8 @@ end
         nPts = 1
         @testset "Degree = 0" begin
             @test GaussQuadrature_2D((xy)->(xy[1]^0 * xy[2]^0), nPts) ≈ 4.0
+            f = [(xy)->(xy[1]^0 * xy[2]^0) (xy)->(xy[1]^0 * xy[2]^0); (xy)->(xy[1]^0 * xy[2]^0) (xy)->(xy[1]^0 * xy[2]^0)]
+            @test GaussQuadrature_2D(f, nPts) ≈ fill(4.0,2,2)
         end
         @testset "Degree = 1" begin
             exInt = [4., 0., 0., 0.]
@@ -794,9 +796,12 @@ end
             num_nodes = degree + 1
             ∇Nₐ = ξ->∇LagrangeBasis_2D(degree,ξ)
             ξ,W = GaussQuadratureRule_2D(2)
-            for a = 1:num_nodes
-                B = StrainDisplacement_2D(∇Nₐ(ξ[a,:]))
-                @test size(B) == (3,2)
+            num_qp = size(ξ, :local_qp_id)
+            for qp = 1:num_qp
+                for a = 1:num_nodes
+                    B = StrainDisplacement_2D(∇Nₐ(ξ[qp,:])[a,:])
+                    @test size(B) == (3,2)
+                end
             end
         end
 
@@ -805,9 +810,12 @@ end
             num_nodes = degree + 1
             ∇Nₐ = ξ->∇LagrangeBasis_2D(degree,ξ)
             ξ,W = GaussQuadratureRule_2D(2)
-            for a = 1:num_nodes
-                B = StrainDisplacement_2D(∇Nₐ(ξ[a,:]))
-                @test size(B) == (3,2)
+            num_qp = size(ξ, :local_qp_id)
+            for qp = 1:num_qp
+                for a = 1:num_nodes
+                    B = StrainDisplacement_2D(∇Nₐ(ξ[qp,:])[a,:])
+                    @test size(B) == (3,2)
+                end
             end
         end
     end

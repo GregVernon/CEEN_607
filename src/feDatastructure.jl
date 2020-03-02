@@ -65,6 +65,7 @@ mutable struct feQuadraturePoint
     ∇Nₐ
     ∇ₓNₐ
     Jᵢⱼ
+    ñ
 end
 
 mutable struct feQuadrature
@@ -87,8 +88,13 @@ mutable struct feElement
     SideNodes
     GlobalID 
     InternalNodes
+    StiffnessMatrix::NamedDimsArray{(:local_dof_id, :local_dof_id,)}
+    ExternalForceVector::NamedDimsArray{(:local_dof_id,)}
+    InternalForceVector::NamedDimsArray{(:local_dof_id,)}
     Quadrature::NamedDimsArray{(:local_side_id,)}
     NumNodes::Int
+    Nₐ
+    ∇Nₐ
     feElement() = new()
 end
 

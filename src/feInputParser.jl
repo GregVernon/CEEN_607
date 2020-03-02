@@ -1,5 +1,3 @@
-import .feEnumerate
-
 function importInput(filename)
     fLines = readlines(filename)
     fLines = strip.(fLines)
@@ -52,7 +50,7 @@ function findInputCards(fLines)
         lcEndLines[lc] = endLines[lc_endline_index]
     end
 
-    LC = [LoadCondition() for bc = 1:num_lc_cards]
+    LC = [LoadCondition() for lc = 1:num_lc_cards]
     for lc = 1:num_lc_cards
         lcCard = fLines[(lcStartLines[lc]+1) : (lcEndLines[lc]-1)]
         LC[lc] = parseLoadCondition(lcCard)
@@ -109,7 +107,6 @@ function parseLoadCondition(Card)
     lc_type_line = Card[lc_type_index][1]
     lc_type = strip(split(lc_type_line,"=")[end])
     lc_type = getproperty(feEnumerate,Symbol(lc_type))
-    
     # Get LC element set or surface set
     if lc_type == feEnumerate.body
         lc_es_index = findall(occursin.("element set",Card))
@@ -145,7 +142,7 @@ function parseLoadCondition(Card)
     # Create a LoadCondition instance and set the values
     LC = LoadCondition()
     LC.Type = lc_type
-    if lc_type == feEnumerate.body
+    if Int(lc_type) == Int(feEnumerate.body)
         LC.ElementSetName = lc_es
     else
         LC.SurfaceSetName = lc_ss

@@ -7,3 +7,4 @@ include("feMesh.jl")
 include("feMeshImport.jl")
 include("feMeshGenerate.jl")
 include("feUtility.jl")
+import .feEnumerate
