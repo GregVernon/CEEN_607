@@ -74,15 +74,17 @@ function initSurfaceSets(G,ELEM)
     for s = 1:num_side_sets
         es_name = join(["elem_ss" string(s)])
         ss_name = join(["side_ss" string(s)])
+        
+        E2G_ElementFaceOrder = makeExodusElement(ELEM[1].ElementFamily).ElementFaceOrder
         SS[s].ChildElements = NamedDimsArray{(:child_elem_id,)}(G[es_name].var[:])
-        SS[s].ChildElements_LocalFace = NamedDimsArray{(:child_elem_id,)}(G[ss_name].var[:])
+        SS[s].ChildElements_LocalFace = NamedDimsArray{(:child_elem_id,)}([findfirst(G[ss_name].var[i] .== collect(E2G_ElementFaceOrder)) for i = 1:length(G[ss_name].var[:])])
         SS[s].ChildNodes = Int64[]
         for e = 1:length(SS[s].ChildElements)
             geID = SS[s].ChildElements[e]
             elem_type = ELEM[geID].ElementFamily
             locFaceID = SS[s].ChildElements_LocalFace[e]
             R = makeExodusElement(elem_type)
-            locNodeID = R.FaceNodeOrder[locFaceID]
+            locNodeID = unname(R.FaceNodeOrder[locFaceID,:])
             append!(SS[s].ChildNodes, ELEM[geID].ChildNodes[locNodeID])
         end
         SS[s].ChildNodes = NamedDimsArray{(:child_node_id,)}(unique(SS[s].ChildNodes))
@@ -109,7 +111,8 @@ function initNodeSets(G)
     num_el_blk    = G.dim["num_el_blk"]
     num_node_sets = G.dim["num_node_sets"]
     num_side_sets = G.dim["num_side_sets"]
-     
+    node_num_map  = G["node_num_map"]
+
     NS = NamedDimsArray{(:global_nodeset_id,)}([feNodeSet() for n = 1:num_node_sets])
     for n = 1:num_node_sets
         ns_name = join(["node_ns" string(n)])
@@ -152,9 +155,6 @@ function initElements(G)
         num_elem_in_block = size(G[blk_name].var[:],2)
         for blk_e = 1:num_elem_in_block
             e+=1
-            # ELEM[e] = feElement()
-            ELEM[e].Dimension = Dimension
-            ELEM[e].NumVariates = num_variates
             ELEM[e].Degree = ones(Int8, Dimension)
             ELEM[e].ElementFamily = elem_type
             ELEM[e].ChildNodes = G[blk_name].var[E2G_nodeOrder,blk_e]
@@ -174,28 +174,24 @@ function initNodes(G,ELEM)
     num_el_blk    = G.dim["num_el_blk"]
     num_node_sets = G.dim["num_node_sets"]
     num_side_sets = G.dim["num_side_sets"]
+    node_num_map  = G["node_num_map"]
     
     # Create the Nodes
     NODES = NamedDimsArray{(:global_node_id,)}([feNode() for n = 1:num_nodes])
     for n = 1:num_nodes
-        # Mesh input is linear only
-        NODES[n].isElementBoundaryNode = true
-        NODES[n].isElementCornerNode = true
-        NODES[n].isElementFaceNode = true
-        NODES[n].isElementInternalNode = false
         # Load Nodal Positions
         if num_dim == 1
             coordx = G["coordx"].var[n]
-            NODES[n].Coordinates = NamedDimsArray{(:ℝᴺ,)}(coordx)
+            NODES[node_num_map[n]].Coordinates = NamedDimsArray{(:ℝᴺ,)}(coordx)
         elseif num_dim == 2
             coordx = G["coordx"].var[n]
             coordy = G["coordy"].var[n]
-            NODES[n].Coordinates = NamedDimsArray{(:ℝᴺ,)}([coordx, coordy])
+            NODES[node_num_map[n]].Coordinates = NamedDimsArray{(:ℝᴺ,)}([coordx, coordy])
         elseif num_dim == 3
             coordx = G["coordx"].var[n]
             coordy = G["coordy"].var[n]
             coordz = G["coordz"].var[n]
-            NODES[n].Coordinates = NamedDimsArray{(:ℝᴺ,)}([coordx, coordy, coordz])
+            NODES[node_num_map[n]].Coordinates = NamedDimsArray{(:ℝᴺ,)}([coordx, coordy, coordz])
         end
     end
 
@@ -219,16 +215,16 @@ function assignLoadConditions(GEOM, LC)
     # Set the applied loads for the surface sets
     for n = 1:num_surface_sets
         if isdefined(GEOM.SurfaceSets[n], :LC_Type) == false
-            GEOM.SurfaceSets[n].LC_Type = []
-            GEOM.SurfaceSets[n].LC_Direction = []
-            GEOM.SurfaceSets[n].LC_Magnitude = []
+            GEOM.SurfaceSets[n].LC_Type = NamedDimsArray{(:lc_id,)}(Array{feEnumerate.enum_LoadCondition,1}())
+            GEOM.SurfaceSets[n].LC_Direction = NamedDimsArray{(:lc_id,)}(Array{Float64,1}[])
+            GEOM.SurfaceSets[n].LC_Magnitude = NamedDimsArray{(:lc_id,)}(Float64[])
         end
         for m = 1:num_load_conditions
             if LC[m].Type in [feEnumerate.pressure, feEnumerate.traction, feEnumerate.force]
                 if lowercase(GEOM.SurfaceSets[n].Name) == lowercase(LC[m].SurfaceSetName)
                     push!(GEOM.SurfaceSets[n].LC_Type, LC[m].Type)
-                    append!(GEOM.SurfaceSets[n].LC_Direction, LC[m].Direction)
-                    append!(GEOM.SurfaceSets[n].LC_Magnitude, LC[m].Magnitude)
+                    push!(GEOM.SurfaceSets[n].LC_Direction, LC[m].Direction)
+                    push!(GEOM.SurfaceSets[n].LC_Magnitude, LC[m].Magnitude)
                 end
             end
         end
@@ -237,16 +233,16 @@ function assignLoadConditions(GEOM, LC)
     # Set the applied loads for the element sets
     for n = 1:num_element_sets
         if isdefined(GEOM.ElementSets[n], :LC_Type) == false
-            GEOM.ElementSets[n].LC_Type = []
-            GEOM.ElementSets[n].LC_Direction = []
-            GEOM.ElementSets[n].LC_Magnitude = []
+            GEOM.ElementSets[n].LC_Type = NamedDimsArray{(:lc_id,)}(Array{feEnumerate.enum_LoadCondition,1}())
+            GEOM.ElementSets[n].LC_Direction = NamedDimsArray{(:lc_id,)}(Array{Float64,1}[])
+            GEOM.ElementSets[n].LC_Magnitude = NamedDimsArray{(:lc_id,)}(Float64[])
         end
         for m = 1:num_load_conditions
             if LC[m].Type in [feEnumerate.body]
                 if lowercase(GEOM.ElementSets[n].Name) == lowercase(LC[m].ElementSetName)
                     push!(GEOM.ElementSets[n].LC_Type, LC[m].Type)
-                    append!(GEOM.ElementSets[n].LC_Direction, LC[m].Direction)
-                    append!(GEOM.ElementSets[n].LC_Magnitude, LC[m].Magnitude)
+                    push!(GEOM.ElementSets[n].LC_Direction, LC[m].Direction)
+                    push!(GEOM.ElementSets[n].LC_Magnitude, LC[m].Magnitude)
                 end
             end
         end
@@ -261,15 +257,15 @@ function assignBoundaryConditions(GEOM, BC)
     # Set the constrained DOF for the nodesets
     for n = 1:num_node_sets
         if isdefined(GEOM.NodeSets[n], :BC_Type) == false
-            GEOM.NodeSets[n].BC_Type = []
-            GEOM.NodeSets[n].BC_DOF = []
-            GEOM.NodeSets[n].BC_Value = []
+            GEOM.NodeSets[n].BC_Type = NamedDimsArray{(:bc_id,)}(Array{feEnumerate.enum_BoundaryCondition,1}())
+            GEOM.NodeSets[n].BC_DOF = NamedDimsArray{(:bc_id,)}(Int[])
+            GEOM.NodeSets[n].BC_Value = NamedDimsArray{(:bc_id,)}(Float64[])
         end
         for m = 1:num_boundary_conditions
             if lowercase(GEOM.NodeSets[n].Name) == lowercase(BC[m].NodeSetName)
                 push!(GEOM.NodeSets[n].BC_Type, BC[m].Type)
-                append!(GEOM.NodeSets[n].BC_DOF, BC[m].DOF)
-                append!(GEOM.NodeSets[n].BC_Value, BC[m].Value)
+                push!(GEOM.NodeSets[n].BC_DOF, BC[m].DOF)
+                push!(GEOM.NodeSets[n].BC_Value, BC[m].Value)
             end
         end
     end

@@ -1,4 +1,4 @@
-geometry = 2x2_mesh.g
+geometry = 1x1_mesh.g
 
 begin boundary condition
 	type = Dirichlet

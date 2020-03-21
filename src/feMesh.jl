@@ -132,13 +132,14 @@ function buildLoadTypeArray(ELEMS,SURFACESETS)
     return LoadTypeArray
 end
 
-function buildElementQuadrature(ELEMS)
+function buildElementQuadrature(ELEMS, NODES)
     num_elems = length(ELEMS)
     for e = 1:num_elems
         eDegree = ELEMS[e].Degree
-        num_dims = ELEMS[e].Dimension
+        num_loc_nodes = length(ELEMS[e].ChildNodes)
+        num_dims = 2
         # Preallocate Quadrature Array for Element Sides
-        num_loc_sides = size(ELEMS[1].SideNodes, :local_side_id)
+        num_loc_sides = size(ELEMS[e].SideNodes, :local_side_id)
         for i = 1:num_loc_sides
             if i == 1
                 ELEMS[e].Quadrature = NamedDimsArray{(:local_side_id,)}(Array{feQuadrature,1}())
@@ -177,100 +178,97 @@ function buildElementQuadrature(ELEMS)
         ELEMS[e].Quadrature[1].Type = "Gauss-Legendre"
         nPts = Int(ceil((max(eDegree...))/2)) + 1
         if num_dims == 2
-            side_id = 1
-            ξ,W = GaussQuadratureRule_2D(nPts)
-            xₐ = buildLocalNodeCoordinates_2D(eDegree[1])
-            Nₐ = ξ->LagrangeBasis_2D(eDegree[1],ξ)
-            ∇Nₐ = ξ->∇LagrangeBasis_2D(eDegree[1],ξ)
+            side_id = 0
+            x̃ᵉ = NamedDimsArray{(:local_node_id, :ℝᴺ)}(zeros(num_loc_nodes,2))
+            for n = 1:length(ELEMS[e].ChildNodes)
+                x̃ᵉ[n,:] = NODES[ELEMS[e].ChildNodes[n]].Coordinates
+            end
+            ξ,𝒲 = GaussQuadratureRule_2D(nPts)
+            𝓝 = ξ->LagrangeBasis_2D(eDegree[1],ξ)
+            ∇𝓝 = ξ->∇LagrangeBasis_2D(eDegree[1],ξ)
+            Jᵢⱼ = ξ->∇map_ℙᴺ_to_ℝᴺ(∇𝓝, x̃ᵉ, ξ)
             for qp = 1:size(ξ, :local_qp_id)
-                Jᵢⱼ = ξ->compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
-                
-                ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].Coordinates = ξ[qp,:]
-                ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].Weights = W[qp]
-                ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].Nₐ = Nₐ(ξ[qp,:])
-                ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].∇Nₐ = ∇Nₐ(ξ[qp,:])
-                ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].Jᵢⱼ = Jᵢⱼ(ξ[qp,:])
-                ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].∇ₓNₐ = compute∇ₓNₐ(∇Nₐ(ξ[qp,:]), Jᵢⱼ(ξ[qp,:]))
+                ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].ℙ = ξ[qp,:]
+                ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].𝒲 = 𝒲[qp]
+                ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].𝓝 = 𝓝(ξ[qp,:])
+                ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].∇𝓝 = ∇𝓝(ξ[qp,:])
+                ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].Jᵢⱼ = Jᵢⱼ(ξ[qp,:])
+                ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].α = computeIntegralScaling_2D(Jᵢⱼ(ξ[qp,:]), side_id)
+                ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].∇ₓ𝓝 = compute∇ₓ𝓝(∇𝓝(ξ[qp,:]), Jᵢⱼ(ξ[qp,:]))
             end
             
             
-            for side_id = 2:num_loc_sides
+            for side_id = 1:num_loc_sides-1
                 if side_id == 1
                     # num_side_nodes = eDegree[2] + 1
-                    ξ,W = GaussQuadratureRule_1D(nPts)
-                    ξ = NamedDimsArray{(:local_qp_id,:ℝᴺ,)}([-1.0*(Float64,size(ξ,:local_qp_id)) ξ])
+                    ξ,𝒲 = GaussQuadratureRule_1D(nPts)
+                    ξ = NamedDimsArray{(:local_qp_id,:ℙᴺ,)}([-1.0*ones(Float64,size(ξ,:local_qp_id)) ξ])
                     xₐ = buildLocalNodeCoordinates_2D(eDegree[1])
-                    Nₐ = ξ->LagrangeBasis_2D(eDegree[1],ξ)
-                    ∇Nₐ = ξ->∇LagrangeBasis_2D(eDegree[2],ξ)
-                    Jᵢⱼ = ξ->compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
+                    𝓝 = ξ->LagrangeBasis_2D(eDegree[1],ξ)
+                    ∇𝓝 = ξ->∇LagrangeBasis_2D(eDegree[2],ξ)
+                    Jᵢⱼ = ξ->∇map_ℙᴺ_to_ℝᴺ(∇𝓝, xₐ, ξ)
                     for qp = 1:nPts
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].Coordinates = ξ[qp,:]
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].Weights = W[qp]
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].Nₐ = Nₐ(ξ[qp,:])
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].∇Nₐ = ∇Nₐ(ξ[qp,:])
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].Jᵢⱼ = Jᵢⱼ(ξ[qp,:])
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].∇ₓNₐ = compute∇ₓNₐ(∇Nₐ(ξ[qp,:]), Jᵢⱼ(ξ[qp,:]))
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].ñ = computeBoundaryNormals(Jᵢⱼ(ξ[qp,:]), side_id)
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].ℙ = ξ[qp,:]
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].𝒲 = 𝒲[qp]
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].𝓝 = 𝓝(ξ[qp,:])
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].∇𝓝 = ∇𝓝(ξ[qp,:])
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].Jᵢⱼ = Jᵢⱼ(ξ[qp,:])
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].α = computeIntegralScaling_2D(Jᵢⱼ(ξ[qp,:]), side_id)
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].∇ₓ𝓝 = compute∇ₓ𝓝(∇𝓝(ξ[qp,:]), Jᵢⱼ(ξ[qp,:]))
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].ñ = computeBoundaryNormals(Jᵢⱼ(ξ[qp,:]), side_id)
                     end
                 elseif side_id == 2
-                    ξ,W = GaussQuadratureRule_1D(nPts)
-                    ξ = NamedDimsArray{(:local_qp_id,:ℝᴺ,)}([+1.0*ones(Float64,size(ξ,:local_qp_id)) ξ])
+                    ξ,𝒲 = GaussQuadratureRule_1D(nPts)
+                    ξ = NamedDimsArray{(:local_qp_id,:ℙᴺ,)}([+1.0*ones(Float64,size(ξ,:local_qp_id)) ξ])
                     xₐ = buildLocalNodeCoordinates_2D(eDegree[1])
-                    Nₐ = ξ->LagrangeBasis_2D(eDegree[1],ξ)
-                    ∇Nₐ = ξ->∇LagrangeBasis_2D(eDegree[2],ξ)
-                    Jᵢⱼ = ξ->compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
+                    𝓝 = ξ->LagrangeBasis_2D(eDegree[1],ξ)
+                    ∇𝓝 = ξ->∇LagrangeBasis_2D(eDegree[2],ξ)
+                    Jᵢⱼ = ξ->∇map_ℙᴺ_to_ℝᴺ(∇𝓝, xₐ, ξ)
                     for qp = 1:nPts
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].Coordinates = ξ[qp,:]
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].Weights = W[qp]
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].Nₐ = Nₐ(ξ[qp,:])
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].∇Nₐ = ∇Nₐ(ξ[qp,:])
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].Jᵢⱼ = Jᵢⱼ(ξ[qp,:])
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].∇ₓNₐ = compute∇ₓNₐ(∇Nₐ(ξ[qp,:]), Jᵢⱼ(ξ[qp,:]))
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].ñ = computeBoundaryNormals(Jᵢⱼ(ξ[qp,:]), side_id)
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].ℙ = ξ[qp,:]
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].𝒲 = 𝒲[qp]
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].𝓝 = 𝓝(ξ[qp,:])
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].∇𝓝 = ∇𝓝(ξ[qp,:])
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].Jᵢⱼ = Jᵢⱼ(ξ[qp,:])
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].α = computeIntegralScaling_2D(Jᵢⱼ(ξ[qp,:]), side_id)
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].∇ₓ𝓝 = compute∇ₓ𝓝(∇𝓝(ξ[qp,:]), Jᵢⱼ(ξ[qp,:]))
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].ñ = computeBoundaryNormals(Jᵢⱼ(ξ[qp,:]), side_id)
                     end
                 elseif side_id == 3
-                    ξ,W = GaussQuadratureRule_1D(nPts)
-                    ξ = NamedDimsArray{(:local_qp_id,:ℝᴺ,)}([ξ -1.0*ones(Float64,size(ξ,:local_qp_id))])
+                    ξ,𝒲 = GaussQuadratureRule_1D(nPts)
+                    ξ = NamedDimsArray{(:local_qp_id,:ℙᴺ,)}([ξ -1.0*ones(Float64,size(ξ,:local_qp_id))])
                     xₐ = buildLocalNodeCoordinates_2D(eDegree[1])
-                    Nₐ = ξ->LagrangeBasis_2D(eDegree[1],ξ)
-                    ∇Nₐ = ξ->∇LagrangeBasis_2D(eDegree[2],ξ)
-                    Jᵢⱼ = ξ->compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
+                    𝓝 = ξ->LagrangeBasis_2D(eDegree[1],ξ)
+                    ∇𝓝 = ξ->∇LagrangeBasis_2D(eDegree[2],ξ)
+                    Jᵢⱼ = ξ->∇map_ℙᴺ_to_ℝᴺ(∇𝓝, xₐ, ξ)
                     for qp = 1:nPts
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].Coordinates = ξ[qp,:]
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].Weights = W[qp]
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].Nₐ = Nₐ(ξ[qp,:])
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].∇Nₐ = ∇Nₐ(ξ[qp,:])
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].Jᵢⱼ = Jᵢⱼ(ξ[qp,:])
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].∇ₓNₐ = compute∇ₓNₐ(∇Nₐ(ξ[qp,:]), Jᵢⱼ(ξ[qp,:]))
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].ñ = computeBoundaryNormals(Jᵢⱼ(ξ[qp,:]), side_id)
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].ℙ = ξ[qp,:]
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].𝒲 = 𝒲[qp]
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].𝓝 = 𝓝(ξ[qp,:])
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].∇𝓝 = ∇𝓝(ξ[qp,:])
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].Jᵢⱼ = Jᵢⱼ(ξ[qp,:])
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].α = computeIntegralScaling_2D(Jᵢⱼ(ξ[qp,:]), side_id)
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].∇ₓ𝓝 = compute∇ₓ𝓝(∇𝓝(ξ[qp,:]), Jᵢⱼ(ξ[qp,:]))
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].ñ = computeBoundaryNormals(Jᵢⱼ(ξ[qp,:]), side_id)
                     end
                 elseif side_id == 4
-                    ξ,W = GaussQuadratureRule_1D(nPts)
-                    ξ = NamedDimsArray{(:local_qp_id,:ℝᴺ,)}([ξ +1.0*ones(Float64,size(ξ,:local_qp_id))])
+                    ξ,𝒲 = GaussQuadratureRule_1D(nPts)
+                    ξ = NamedDimsArray{(:local_qp_id,:ℙᴺ,)}([ξ +1.0*ones(Float64,size(ξ,:local_qp_id))])
                     xₐ = buildLocalNodeCoordinates_2D(eDegree[1])
-                    Nₐ = ξ->LagrangeBasis_2D(eDegree[1],ξ)
-                    ∇Nₐ = ξ->∇LagrangeBasis_2D(eDegree[2],ξ)
-                    Jᵢⱼ = ξ->compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
+                    𝓝 = ξ->LagrangeBasis_2D(eDegree[1],ξ)
+                    ∇𝓝 = ξ->∇LagrangeBasis_2D(eDegree[2],ξ)
+                    Jᵢⱼ = ξ->∇map_ℙᴺ_to_ℝᴺ(∇𝓝, xₐ, ξ)
                     for qp = 1:nPts
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].Coordinates = ξ[qp,:]
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].Weights = W[qp]
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].Nₐ = Nₐ(ξ[qp,:])
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].∇Nₐ = ∇Nₐ(ξ[qp,:])
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].Jᵢⱼ = Jᵢⱼ(ξ[qp,:])
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].∇ₓNₐ = compute∇ₓNₐ(∇Nₐ(ξ[qp,:]), Jᵢⱼ(ξ[qp,:]))
-                        ELEMS[e].Quadrature[side_id].QuadraturePoints[qp].ñ = computeBoundaryNormals(Jᵢⱼ(ξ[qp,:]), side_id)
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].ℙ = ξ[qp,:]
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].𝒲 = 𝒲[qp]
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].𝓝 = 𝓝(ξ[qp,:])
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].∇𝓝 = ∇𝓝(ξ[qp,:])
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].Jᵢⱼ = Jᵢⱼ(ξ[qp,:])
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].α = computeIntegralScaling_2D(Jᵢⱼ(ξ[qp,:]), side_id)
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].∇ₓ𝓝 = compute∇ₓ𝓝(∇𝓝(ξ[qp,:]), Jᵢⱼ(ξ[qp,:]))
+                        ELEMS[e].Quadrature[side_id+1].QuadraturePoints[qp].ñ = computeBoundaryNormals(Jᵢⱼ(ξ[qp,:]), side_id)
                     end
                 end
-            end
-
-        elseif num_dims == 3
-            ξ,W = GaussQuadratureRule_3D(nPts)
-            ELEMS[e].Quadrature[1].Points = ξ
-            ELEMS[e].Quadrature[1].Weights = W
-            for side_id = 2:num_loc_sides+1
-                ξ, W = GaussQuadratureRule_2D(nPts)
-                ELEMS[e].Quadrature[side_id].Points = ξ
-                ELEMS[e].Quadrature[side_id].Weights = W
             end
         end
     end
@@ -325,26 +323,6 @@ end
 function setElementNodeTypes(ELEMS,NODES)
     num_elem = length(ELEMS)
     for e = 1:num_elem
-        num_nodes = length(ELEMS[e].ChildNodes)
-        ELEMS[e].BoundaryNodes = NamedDimsArray{(:local_node_id,)}(zeros(Int64,num_nodes))
-        ELEMS[e].CornerNodes = zeros(Int64,num_nodes)
-        ELEMS[e].FaceNodes = zeros(Int64,num_nodes)
-        ELEMS[e].InternalNodes = zeros(Int64,num_nodes)
-        for n = 1:num_nodes
-            gnID = ELEMS[e].ChildNodes[n]
-            if NODES[gnID].isElementBoundaryNode
-                ELEMS[e].BoundaryNodes[n] = gnID
-            end
-            if NODES[gnID].isElementCornerNode
-                ELEMS[e].CornerNodes[n] = gnID
-            end
-            if NODES[gnID].isElementFaceNode
-                ELEMS[e].FaceNodes[n] = gnID
-            end
-            if NODES[gnID].isElementInternalNode
-                ELEMS[e].InternalNodes[n] = gnID
-            end
-        end
         RefElem = makeExodusElement(ELEMS[e].ElementFamily)
         ELEMS[e].SideNodes = NamedDimsArray{(:local_side_id,)}(Array{Any,1}(undef, size(RefElem.FaceNodeOrder,1)+1))
         for side_id = 0:size(RefElem.FaceNodeOrder,1)
@@ -373,7 +351,7 @@ function makeExodusElement(elem_type)
 
     if elem_type == "QUAD4"
         ElementNodeOrder = [1, 2, 4, 3]
-        ElementFaceOrder = [1]
+        ElementFaceOrder = [4, 2, 1, 3]
         FaceNodeOrder = [3 1; 2 4; 1 2; 4 3]
         isBoundaryNode = fill(true,4)
         isCornerNode = fill(true,4)

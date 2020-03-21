@@ -1,7 +1,7 @@
+include("feEnumerate.jl")
 include("feCode.jl")
 include("feDatastructure.jl")
 include("feElement.jl")
-include("feEnumerate.jl")
 include("feInputParser.jl")
 include("feMesh.jl")
 include("feMeshImport.jl")

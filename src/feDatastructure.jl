@@ -1,71 +1,70 @@
 using NamedDims
 
 mutable struct feElementSet
-    ChildElements
-    Dimension 
-    NumVariates
-    ElementFamily 
-    LC_Type
-    LC_Direction
-    LC_Magnitude
-    BC_Type
-    BC_DOF
-    BC_Value
+    ChildElements::Array{Int,1}
+    Dimension::Int
+    NumVariates::Int
+    ElementFamily::String
+    LC_Type::NamedDimsArray{(:lc_id,), feEnumerate.enum_LoadCondition}           # push(NS.LC_Type, feEnumerate.pressure)
+    LC_Direction::NamedDimsArray{(:lc_id,),Array{Float64,1}}                     # NS.LC_Direction = [NS.LC_Direction; [1. 2.] ]
+    LC_Magnitude::NamedDimsArray{(:lc_id,), Float64}                             # push!(NS.LC_Magnitude, 10.) or NS.LC_Magnitude = [NS.LC_Magnitude; [10.]]
+    LC_NL_Solve_Scale::Float64
+    BC_Type::NamedDimsArray{(:bc_id,), feEnumerate.enum_BoundaryCondition}
+    BC_DOF::NamedDimsArray{(:bc_id,), Int}
+    BC_Value::NamedDimsArray{(:bc_id,), Float64}
+    BC_NL_Solve_Scale::Float64
     Name::String
     feElementSet() = new()
 end
 
 mutable struct feSurfaceSet
-    ChildElements
-    ChildElements_LocalFace
-    ChildNodes
-    LC_Type
-    LC_Direction
-    LC_Magnitude
-    BC_Type
-    BC_DOF
-    BC_Value
+    ChildElements::Array{Int,1}
+    ChildElements_LocalFace::Array{Int,1}
+    ChildNodes::Array{Int,1}
+    LC_Type::NamedDimsArray{(:lc_id,), feEnumerate.enum_LoadCondition}           # push(NS.LC_Type, feEnumerate.pressure)
+    LC_Direction::NamedDimsArray{(:lc_id,),Array{Float64,1}}                     # NS.LC_Direction = [NS.LC_Direction; [1. 2.] ]
+    LC_Magnitude::NamedDimsArray{(:lc_id,), Float64}                             # push!(NS.LC_Magnitude, 10.) or NS.LC_Magnitude = [NS.LC_Magnitude; [10.]]
+    LC_NL_Solve_Scale::Float64
+    BC_Type::NamedDimsArray{(:bc_id,), feEnumerate.enum_BoundaryCondition}
+    BC_DOF::NamedDimsArray{(:bc_id,), Int}
+    BC_Value::NamedDimsArray{(:bc_id,), Float64}
+    BC_NL_Solve_Scale::Float64
     Name::String
     feSurfaceSet() = new()
 end
 
 mutable struct feNodeSet
-    ChildNodes
-    LC_Type
-    LC_Direction
-    LC_Magnitude
-    BC_Type
-    BC_DOF
-    BC_Value
+    ChildNodes::Array{Int,1}
+    LC_Type::NamedDimsArray{(:lc_id,), feEnumerate.enum_BoundaryCondition}           # push!(NS.LC_Type, feEnumerate.pressure)
+    LC_Direction::NamedDimsArray{(:lc_id,),Array{Float64,1}}                     # NS.LC_Direction = [NS.LC_Direction; [1. 2.] ]
+    LC_Magnitude::NamedDimsArray{(:lc_id,), Float64}                             # push!(NS.LC_Magnitude, 10.) or NS.LC_Magnitude = [NS.LC_Magnitude; [10.]]
+    LC_NL_Solve_Scale::Float64
+    BC_Type::NamedDimsArray{(:bc_id,), feEnumerate.enum_BoundaryCondition}
+    BC_DOF::NamedDimsArray{(:bc_id,), Int}
+    BC_Value::NamedDimsArray{(:bc_id,), Float64}
+    BC_NL_Solve_Scale::Float64
     Name::String
     feNodeSet() = new()
 end
 
 mutable struct feNode
     Basis::String
-    ParentElements 
+    ParentElements::Array{Int,1}
     Coordinates::NamedDimsArray{(:ℝᴺ,)}
-    isElementBoundaryNode::Bool
-    isElementCornerNode::Bool
-    isElementFaceNode::Bool
-    isElementInternalNode::Bool
-    isMeshBoundaryNode::Bool
-    isMeshCornerNode::Bool
-    isMeshFaceNode::Bool
-    isMeshInternalNode::Bool
     ChildDOFS::NamedDimsArray{(:local_dof_id,)}
     feNode() = new()
 end
 
 mutable struct feQuadraturePoint
+    ℙ::NamedDimsArray{(:ℙᴺ,)}  # 1xN vector
+    𝒲::Float64
+    𝓝::NamedDimsArray{(:local_node_id,)}
+    ∇𝓝::NamedDimsArray{(:local_node_id, :ℙᴺ,)}
+    ∇ₓ𝓝::NamedDimsArray{(:local_node_id, :ℝᴺ)}
+    Jᵢⱼ::NamedDimsArray{(:ℝᴺ,:ℙᴺ)}
+    α::Float64
+    ñ::NamedDimsArray{(:ℙᴺ,)}  # 1xN vector
     feQuadraturePoint() = new()
-    Coordinates
-    Weights
-    Nₐ
-    ∇Nₐ
-    ∇ₓNₐ
-    Jᵢⱼ
-    ñ
 end
 
 mutable struct feQuadrature
@@ -77,24 +76,19 @@ end
 mutable struct feElement
     Basis::String
     BoundaryNodes::NamedDimsArray{(:local_node_id,)}
+    ChildNodes::Array{Int,1}
+    Degree::Array{Int,1}
+    ElementFamily::String
+    GlobalID::Int
     ParentBlock::Int
-    ChildNodes 
-    CornerNodes 
-    Degree 
-    Dimension 
-    NumVariates
-    ElementFamily 
-    FaceNodes 
-    SideNodes
-    GlobalID 
-    InternalNodes
+    SideNodes::NamedDimsArray{(:local_side_id,)}
     StiffnessMatrix::NamedDimsArray{(:local_dof_id, :local_dof_id,)}
     ExternalForceVector::NamedDimsArray{(:local_dof_id,)}
     InternalForceVector::NamedDimsArray{(:local_dof_id,)}
     Quadrature::NamedDimsArray{(:local_side_id,)}
     NumNodes::Int
-    Nₐ
-    ∇Nₐ
+    𝓝
+    ∇𝓝
     feElement() = new()
 end
 

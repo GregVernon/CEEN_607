@@ -2,46 +2,6 @@ using NamedDims
 import LinearAlgebra
 import ForwardDiff
 
-function GaussQuadrature_1D(fun, nPts)
-    ξ,W = GaussQuadratureRule_1D(nPts)
-    nQP = nPts^1
-
-    ∫fun = 0.
-    for n = 1:nQP
-        ∫fun += fun(ξ[n]) * W[n]
-    end
-    return ∫fun
-end
-
-function GaussQuadrature_2D(fun,nPts)
-    ξ,W = GaussQuadratureRule_2D(nPts)
-    nQP = nPts^2
-
-    sizeFun = size(fun(ξ[1,:]))
-    if sizeFun == ()
-        ∫fun = 0.
-    else
-        ∫fun = zeros(Float64, sizeFun)
-    end
-
-    for n = 1:nQP
-        ∫fun += fun(ξ[n,:]) * W[n]
-    end
-    return ∫fun
-end
-
-function GaussQuadrature_3D(fun,nPts)
-    ξ,W = GaussQuadratureRule_3D(nPts)
-    nQP = nPts^3
-
-    ∫fun = 0.
-    for n = 1:nQP
-        ∫fun += fun(ξ[n,:]) * W[n]
-    end
-    return ∫fun
-
-end
-
 function GaussQuadratureRule_1D(nPts)
     if nPts == 1
         ξ = NamedDimsArray{(:local_qp_id,)}([0.])
@@ -62,7 +22,7 @@ function GaussQuadratureRule_2D(nPts)
     η,W[2] = GaussQuadratureRule_1D(nPts)
 
     nQP = nPts^2
-    QP = NamedDimsArray{(:local_qp_id, :ℝᴺ)}(zeros(Float64,nQP,2))
+    QP = NamedDimsArray{(:local_qp_id, :ℙᴺ)}(zeros(Float64,nQP,2))
     QW = NamedDimsArray{(:local_qp_id,)}(zeros(Float64,nQP))
     n = 0
     for j = 1:nPts
@@ -75,130 +35,79 @@ function GaussQuadratureRule_2D(nPts)
     return QP,QW
 end
 
-function GaussQuadratureRule_3D(nPts)
-    W = Array{Array{Float64},1}(undef,3)
-    ξ,W[1] = GaussQuadratureRule_1D(nPts)
-    η,W[2] = GaussQuadratureRule_1D(nPts)
-    ζ,W[3] = GaussQuadratureRule_1D(nPts)
-
-    nQP = nPts^3
-    QP = NamedDimsArray{(:local_qp_id, :ℝᴺ)}(zeros(Float64,nQP,3))
-    QW = NamedDimsArray{(:local_qp_id,)}(zeros(Float64,nQP))
-    n = 0
-    for k = 1:nPts
-        for j = 1:nPts
-            for i = 1:nPts
-                n+=1
-                QP[n,:] = [ξ[i], η[j], ζ[k]]
-                QW[n] = W[1][i] * W[2][j] * W[3][k]
-            end
-        end
-    end
-    return QP,QW
-end
-
 function LagrangeBasis_1D(deg, ξ)
     ξ = ξ[1]
-    L = NamedDimsArray{(:local_node_id,)}(Array{Any,1}(undef,deg+1))
+    𝓝 = NamedDimsArray{(:local_node_id,)}(Array{Any,1}(undef,deg+1))
     if deg == 1
-        L = [(1-ξ)/2, (1+ξ)/2]
-        return L
+        𝓝 = [(1-ξ)/2, (1+ξ)/2]
+        return 𝓝
     elseif deg == 2
-        L = [(ξ^2 - ξ)/2, 1-ξ^2, (ξ^2 + ξ)/2]
-        return L
+        𝓝 = [(ξ^2 - ξ)/2, 1-ξ^2, (ξ^2 + ξ)/2]
+        return 𝓝
     end
 end
 
 function LagrangeBasis_2D(deg,ξ)
-    L = NamedDimsArray{(:local_node_id,)}(Array{Any,1}(undef,(deg+1)^2))
-    L1 = LagrangeBasis_1D(deg,ξ[1])
-    L2 = LagrangeBasis_1D(deg,ξ[2])
+    𝓝 = NamedDimsArray{(:local_node_id,)}(Array{Any,1}(undef,(deg+1)^2))
+    𝓝₁ = LagrangeBasis_1D(deg,ξ[1])
+    𝓝₂ = LagrangeBasis_1D(deg,ξ[2])
     n = 0
     for j = 1:deg+1
         for i = 1:deg+1
             n += 1
-            L[n] = L1[i] * L2[j]
+            𝓝[n] = 𝓝₁[i] * 𝓝₂[j]
         end
     end
-    return L
-end
-
-function LagrangeBasis_3D(deg,ξ)
-    L = NamedDimsArray{(:local_node_id,)}(Array{Any,1}(undef,(deg+1)^3))
-    L1 = LagrangeBasis_1D(deg,ξ[1])
-    L2 = LagrangeBasis_1D(deg,ξ[2])
-    L3 = LagrangeBasis_1D(deg,ξ[3])
-    n = 0
-    for k = 1:deg+1
-        for j = 1:deg+1
-            for i = 1:deg+1
-                n += 1
-                L[n] = L1[i] * L2[j] * L3[k]
-            end
-        end
-    end
-    return L
-end
-
-function ∇LagrangeBasis_1D(deg,ξ)
-    f(ξ) = LagrangeBasis_1D(deg,ξ)
-    ∇f = ForwardDiff.jacobian(ξ->f(ξ),ξ)
-    return ∇f
+    return 𝓝
 end
 
 function ∇LagrangeBasis_2D(deg,ξ)
-    f(ξ) = LagrangeBasis_2D(deg,ξ)
-    ∇f = ForwardDiff.jacobian(ξ->f(ξ),ξ)
-    return ∇f
+    𝓝(ξ) = LagrangeBasis_2D(deg,ξ)
+    ∇𝓝 = NamedDimsArray{(:local_node_id, :ℙᴺ,)}(ForwardDiff.jacobian(ξ->𝓝(ξ),ξ))
+    return ∇𝓝
 end
 
-function ∇LagrangeBasis_3D(deg,ξ)
-    f(ξ) = LagrangeBasis_3D(deg,ξ)
-    ∇f = ForwardDiff.jacobian(ξ->f(ξ),ξ)
-    return ∇f
-end
-
-function computeGeometricMapping(Nₐ, xₐ, ξ)
+function map_ℙᴺ_to_ℝᴺ(𝓝, Xᵉ , ξ)
     x = NamedDimsArray{(:ℝᴺ,)}(zeros(Float64,size(ξ)))
-    num_nodes = size(xₐ, :local_node_id)
+    num_nodes = size(Xᵉ, :local_node_id)
     for n = 1:num_nodes
-        x += Nₐ(ξ)[n] .* xₐ[n,:]
+        x += 𝓝(ξ)[n] .* Xᵉ[n,:]
     end
     return x
 end
 
-function compute∇GeometricMapping(∇Nₐ, xₐ, ξ)
-    num_nodes = size(xₐ,:local_node_id)
+function ∇map_ℙᴺ_to_ℝᴺ(∇𝓝, Xᵉ, ξ)
+    num_nodes = size(Xᵉ,:local_node_id)
     num_par_dim = length(ξ)
-    num_cart_dim = size(xₐ,:ℝᴺ)
-    Jᵢⱼ = NamedDimsArray{(:ℙᴺ,:ℝᴺ,)}(zeros(Float64,length(ξ),num_cart_dim))
+    num_cart_dim = size(Xᵉ,:ℝᴺ)
+    Jᵢⱼ = NamedDimsArray{(:ℝᴺ,:ℙᴺ)}(zeros(Float64,length(ξ),num_cart_dim))
 
     for n = 1:num_nodes
-        for j = 1:num_par_dim
-            for i = 1:num_cart_dim
-                Jᵢⱼ[j,i] += ∇Nₐ(ξ)[n,j] * xₐ[n,i] 
+        for j = 1:num_cart_dim
+            for i = 1:num_par_dim
+                Jᵢⱼ[i,j] += ∇𝓝(ξ)[n,j] * Xᵉ[n,i] 
             end
         end
     end
-    return transpose(Jᵢⱼ)
+    return Jᵢⱼ
 end
 
-function compute∇ₓNₐ(∇Nₐ, Jᵢⱼ)
-    ∇ₓNₐ = ∇Nₐ * inv(Jᵢⱼ)
-    return ∇ₓNₐ
+function compute∇ₓ𝓝(∇𝓝, Jᵢⱼ)
+    ∇ₓ𝓝 = ∇𝓝 * inv(Jᵢⱼ)
+    return ∇ₓ𝓝
 end
 
-function StrainDisplacement_2D(∇Nₐ)
-    B = [∇Nₐ[1]  0.0;
-         0.0    ∇Nₐ[2];
-         ∇Nₐ[2] ∇Nₐ[1]]
+function StrainDisplacement_2D(∇𝓝ₐ)
+    B = [∇𝓝ₐ[1]  0.0;
+         0.0    ∇𝓝ₐ[2];
+         ∇𝓝ₐ[2] ∇𝓝ₐ[1]]
 end
 
-function computeVirtualStrain_2D(∇Nₐ, cₐ, ξ)
+function computeVirtualStrain_2D(∇𝓝, cₐ, ξ)
     num_nodes = length(cₐ)
     εᵥ = zeros(Float64,3)
     for a = 1:num_nodes
-        εᵥ += StrainDisplacement_2D(∇Nₐ[a,:]) * cₐ
+        εᵥ += StrainDisplacement_2D(∇𝓝[a,:]) * cₐ
     end
     return εᵥ
 end
@@ -226,6 +135,8 @@ function computeBoundaryNormals(Jᵢⱼ, sideID)
     elseif sideID == 4
         ñ = 1/LinearAlgebra.norm(LinearAlgebra.cross([0,0,1], [Jᵢⱼ[:,1]..., 0.0])) * (LinearAlgebra.cross([0,0,1], [Jᵢⱼ[:,1]..., 0.0]))
     end
+
+    ñ = NamedDimsArray{(:ℙᴺ,)}(ñ[1:2])
     return ñ[1:2]
 end
 
@@ -243,14 +154,14 @@ function computeExternalForce(GEOM)
     F_ext = assembleGlobalExternalForceVector(GEOM.Elements, GEOM.Nodes)
 end
 
-function computeInternalForce(Δu, GEOM)
-    GEOM.Elements = computeLocalInternalForceVector(Δu, GEOM.Elements, GEOM.Nodes)
+function computeInternalForce(ũ, GEOM)
+    GEOM.Elements = computeLocalInternalForceVector(ũ, GEOM.Elements, GEOM.Nodes)
     F_int = assembleGlobalInternalForceVector(GEOM.Elements, GEOM.Nodes)
 end
 
-function computeResidual(Δu, GEOM)
+function computeResidual(ũ, GEOM)
     F_External = computeExternalForce(GEOM)
-    F_Internal = computeInternalForce(Δu, GEOM)
+    F_Internal = computeInternalForce(ũ, GEOM)
     Residual = F_External - F_Internal
     return Residual
 end
@@ -263,11 +174,14 @@ function applyBoundaryConditions(R̃, K̃, ũ, GEOM)
             for bc_id = 1:length(GEOM.NodeSets[ns_id].BC_Type)
                 bc_type = GEOM.NodeSets[ns_id].BC_Type[bc_id]
                 if Int(bc_type) == Int(feEnumerate.dirichlet)
-                    for n = 1:length(GEOM.NodeSets[ns_id].ChildNodes)
-                        local_dofs = (n-1) * num_dof_per_node .+ collect(1:num_dof_per_node)
-                        global_dofs = GEOM.Nodes[GEOM.NodeSets[ns_id].ChildNodes[n]].ChildDOFS
-                        ũ[global_dofs] .= GEOM.NodeSets[ns_id].BC_Value[bc_id]
-                        append!(remove_dofs, global_dofs[GEOM.NodeSets[ns_id].BC_DOF[bc_id]])
+                    for bc_dof = 1:length(GEOM.NodeSets[ns_id].BC_DOF)
+                        constrained_local_dof = GEOM.NodeSets[ns_id].BC_DOF[bc_dof]
+                        for n = 1:length(GEOM.NodeSets[ns_id].ChildNodes)
+                            local_dofs = (n-1) * num_dof_per_node .+ collect(1:num_dof_per_node)
+                            constrained_global_dofs = GEOM.Nodes[GEOM.NodeSets[ns_id].ChildNodes[n]].ChildDOFS[constrained_local_dof]
+                            ũ[constrained_global_dofs] = GEOM.NodeSets[ns_id].BC_Value[bc_id]
+                            append!(remove_dofs, constrained_global_dofs)
+                        end
                     end
                 end
             end
@@ -277,6 +191,30 @@ function applyBoundaryConditions(R̃, K̃, ũ, GEOM)
     R̃ = R̃[keep_dofs]
     K̃ = K̃[keep_dofs, keep_dofs]
     return R̃, K̃, keep_dofs, ũ
+end
+
+function applyBoundaryConditions(ũ, GEOM)
+    num_dof_per_node = length(GEOM.Nodes[1].ChildDOFS)
+    for ns_id = 1:length(GEOM.NodeSets)
+        if isempty(GEOM.NodeSets[ns_id].BC_Type) == false
+            for bc_id = 1:length(GEOM.NodeSets[ns_id].BC_Type)
+                bc_type = GEOM.NodeSets[ns_id].BC_Type[bc_id]
+                α = GEOM.NodeSets[ns_id].BC_NL_Solve_Scale
+                if Int(bc_type) == Int(feEnumerate.dirichlet)
+                    for bc_dof = 1:length(GEOM.NodeSets[ns_id].BC_DOF)
+                        constrained_local_dof = GEOM.NodeSets[ns_id].BC_DOF[bc_dof]
+                        for n = 1:length(GEOM.NodeSets[ns_id].ChildNodes)
+                            local_dofs = (n-1) * num_dof_per_node .+ collect(1:num_dof_per_node)
+                            constrained_global_dofs = GEOM.Nodes[GEOM.NodeSets[ns_id].ChildNodes[n]].ChildDOFS[constrained_local_dof]
+                            ũ[constrained_global_dofs] = α * GEOM.NodeSets[ns_id].BC_Value[bc_id]
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    return ũ
 end
 
 function computeLocalInternalForceVector(Δu, ELEMS, NODES)
@@ -291,22 +229,22 @@ function computeLocalInternalForceVector(Δu, ELEMS, NODES)
         ELEMS[e].InternalForceVector = NamedDimsArray{(:local_dof_id,)}(zeros(Float64, num_loc_nodes*num_dof_per_node))
     end
 
-    for e = 1:num_elem
+    for e = 1:num_elem  # For each element...
         nPts = 2
         eDegree = ELEMS[e].Degree
         num_loc_nodes = length(ELEMS[e].ChildNodes)
-        side_id = 1
-        for qp_id = 1:size(ELEMS[e].Quadrature[1].QuadraturePoints,:local_qp_id)
-            QP = ELEMS[e].Quadrature[side_id].QuadraturePoints[qp_id]
-            ξ,W = GaussQuadratureRule_2D(nPts) # QP.Coordinates
-            for n = 1:num_loc_nodes
-                local_dofs = (n-1) * num_dof_per_node .+ collect(1:num_dof_per_node)
-                global_dofs = NODES[ELEMS[e].ChildNodes[n]].ChildDOFS
-                ∇Nₐ = ∇LagrangeBasis_2D(eDegree[1],QP.Coordinates)
-                B̃ = StrainDisplacement_2D(∇Nₐ[n,:])
-                ε = computeVirtualStrain_2D(∇Nₐ, Δu[global_dofs], QP.Coordinates)
+        side_id = 1  # Integration occurs over the element interior
+        for qp_id = 1:size(ELEMS[e].Quadrature[1].QuadraturePoints,:local_qp_id)  # For each quadrature point in the element... (Begin Gauss Quadrature)
+            QP = ELEMS[e].Quadrature[side_id].QuadraturePoints[qp_id]  # (Let QP represent the quadrature point)
+            for n = 1:num_loc_nodes  # For each node in the element...
+                local_dofs = (n-1) * num_dof_per_node .+ collect(1:num_dof_per_node)  # Grab the element's local dof ids associated with the current node
+                global_dofs = NODES[ELEMS[e].ChildNodes[n]].ChildDOFS  # Grab the global dof ids associated with the current node -- Should be a 1:1 mapping from local <-> global ids
+                ∇𝓝 = ∇LagrangeBasis_2D(eDegree[1],QP.ℙ)
+                ∇𝓝ₐ = ∇𝓝[n,:]
+                B̃ = StrainDisplacement_2D(∇𝓝ₐ)
+                ε = computeVirtualStrain_2D(∇𝓝, Δu[global_dofs], QP.ℙ)
                 σ =  D̃ * ε
-                ELEMS[e].InternalForceVector[local_dofs] += transpose(B̃) * σ * LinearAlgebra.det(QP.Jᵢⱼ) * QP.Weights
+                ELEMS[e].InternalForceVector[local_dofs] += (transpose(B̃) * σ) * LinearAlgebra.det(QP.Jᵢⱼ) * QP.α * QP.𝒲
             end
         end
     end
@@ -356,7 +294,7 @@ function computeLocalExternalForceVector(ELEMS, NODES, ELEMENTSETS, SURFACESETS,
                             QP = ELEMS[global_elem_id].Quadrature[local_side_id].QuadraturePoints[qp_id]
                             for loc_node_id = 1:length(ELEMS[global_elem_id].ChildNodes)
                                 loc_dof_id = (loc_node_id-1) * num_dof_per_node .+ collect(1:num_dof_per_node)
-                                ELEMS[global_elem_id].ExternalForceVector[loc_dof_id] +=  f̃ * QP.Nₐ[loc_node_id] * LinearAlgebra.det(QP.Jᵢⱼ) * QP.Weights
+                                ELEMS[global_elem_id].ExternalForceVector[loc_dof_id] +=  f̃ * QP.Nₐ[loc_node_id] * QP.α * QP.𝒲
                             end
                         end
                     end
@@ -366,20 +304,20 @@ function computeLocalExternalForceVector(ELEMS, NODES, ELEMENTSETS, SURFACESETS,
     end
 
     # Evaluate forces on surface sets
-    for ss_id = 1:length(SURFACESETS)
-        if isempty(SURFACESETS[ss_id].LC_Type) == false
-            for lc_id = 1:length(SURFACESETS[ss_id].LC_Type)
-                load_type = SURFACESETS[ss_id].LC_Type[lc_id]
-                if Int(load_type) == Int(feEnumerate.pressure)
-                    for loc_elem_id = 1:length(SURFACESETS[ss_id].ChildElements)
-                        global_elem_id = SURFACESETS[ss_id].ChildElements[loc_elem_id]
-                        side_id = SURFACESETS[ss_id].ChildElements_LocalFace[loc_elem_id]
-                        for qp_id = 1:length(ELEMS[global_elem_id].Quadrature[side_id].QuadraturePoints)
-                            QP = ELEMS[global_elem_id].Quadrature[side_id].QuadraturePoints[qp_id]
-                            f̃ = SURFACESETS[ss_id].LC_Magnitude[lc_id] * QP.ñ / LinearAlgebra.norm(QP.ñ)
-                            for loc_node_id = 1:length(ELEMS[global_elem_id].ChildNodes)
-                                loc_dof_id = (loc_node_id-1) * num_dof_per_node .+ collect(1:num_dof_per_node)
-                                ELEMS[global_elem_id].ExternalForceVector[loc_dof_id] +=  f̃ * QP.Nₐ[loc_node_id] * LinearAlgebra.det(QP.Jᵢⱼ) * QP.Weights
+    for ss_id = 1:length(SURFACESETS)  # Step through each surface set
+        if isempty(SURFACESETS[ss_id].LC_Type) == false  # Check to see if at least one load is applied to this surface set
+            for lc_id = 1:length(SURFACESETS[ss_id].LC_Type)  # For each load applied to this surface set...
+                load_type = SURFACESETS[ss_id].LC_Type[lc_id]  # Get the type of the load
+                if Int(load_type) == Int(feEnumerate.pressure)  # If the load is a pressure...
+                    for loc_elem_id = 1:length(SURFACESETS[ss_id].ChildElements)  # For each element that has a surface (Element may appear multiple times)
+                        global_elem_id = SURFACESETS[ss_id].ChildElements[loc_elem_id]  # Get the global element id
+                        side_id = SURFACESETS[ss_id].ChildElements_LocalFace[loc_elem_id]  # Get the local side of the element that's included in the surface set
+                        for qp_id = 1:length(ELEMS[global_elem_id].Quadrature[side_id].QuadraturePoints)  # For each quadrature point in the current side... (Begin Gauss Quadrature)
+                            QP = ELEMS[global_elem_id].Quadrature[side_id].QuadraturePoints[qp_id]  # (Let QP represent the quadrature point)
+                            f̃ = SURFACESETS[ss_id].LC_Magnitude[lc_id] * QP.ñ / LinearAlgebra.norm(QP.ñ)  # Compute the force vector associated with the pressure using the surface normal 
+                            for loc_node_id = 1:length(ELEMS[global_elem_id].ChildNodes)  # For each node in the element...
+                                loc_dof_id = (loc_node_id-1) * num_dof_per_node .+ collect(1:num_dof_per_node) # Grab the element's local dof ids associated with the current node
+                                ELEMS[global_elem_id].ExternalForceVector[loc_dof_id] +=  f̃ * QP.𝓝[loc_node_id] * QP.α * QP.𝒲  # Add the GQ function evaluation to the local force vector  ### FIX ME -- Need change of coordinates
                             end
                         end
                     end
@@ -440,16 +378,16 @@ function computeLocalElementStiffnessMatrices(ELEMS,NODES,D̃)
         ELEMS[e].StiffnessMatrix = NamedDimsArray{(:local_dof_id, :local_dof_id,)}(zeros(Float64, num_loc_nodes*num_dof_per_node, num_loc_nodes*num_dof_per_node))
         for qp_id = 1:size(ELEMS[e].Quadrature[1].QuadraturePoints,:local_qp_id)
             QP = ELEMS[e].Quadrature[side_id].QuadraturePoints[qp_id]
-            # ξ,W = GaussQuadratureRule_2D(nPts) # QP.Coordinates
+            # ξ,W = GaussQuadratureRule_2D(nPts) # QP.ℙ
             for n1 = 1:num_loc_nodes
                 n1_local_dofs = (n1-1) * num_dof_per_node .+ collect(1:num_dof_per_node)
                 n1_global_dofs = NODES[ELEMS[e].ChildNodes[n1]].ChildDOFS   
-                B̃₁ = StrainDisplacement_2D(∇LagrangeBasis_2D(eDegree[1],QP.Coordinates)[n1,:]) # ξ->StrainDisplacement_2D(∇LagrangeBasis_2D(eDegree[2],ξ)[n1,:]) #StrainDisplacement_2D(ELEMS[e].∇Nₐ[n1,:])
+                B̃₁ = StrainDisplacement_2D(∇LagrangeBasis_2D(eDegree[1],QP.ℙ)[n1,:]) # ξ->StrainDisplacement_2D(∇LagrangeBasis_2D(eDegree[2],ξ)[n1,:]) #StrainDisplacement_2D(ELEMS[e].∇Nₐ[n1,:])
                 for n2 = 1:num_loc_nodes
                     n2_local_dofs = (n2 -1) * num_dof_per_node .+ collect(1:num_dof_per_node)
                     n2_global_dofs = NODES[ELEMS[e].ChildNodes[n2]].ChildDOFS
-                    B̃₂ = StrainDisplacement_2D(∇LagrangeBasis_2D(eDegree[2],QP.Coordinates)[n2,:]) # ξ->StrainDisplacement_2D(∇LagrangeBasis_2D(eDegree[1],ξ)[n2,:]) #StrainDisplacement_2D(ELEMS[e].∇Nₐ[n2,:])
-                    ELEMS[e].StiffnessMatrix[n1_local_dofs,n2_local_dofs] += transpose(B̃₁) * D̃ * B̃₂ * QP.Weights
+                    B̃₂ = StrainDisplacement_2D(∇LagrangeBasis_2D(eDegree[2],QP.ℙ)[n2,:]) # ξ->StrainDisplacement_2D(∇LagrangeBasis_2D(eDegree[1],ξ)[n2,:]) #StrainDisplacement_2D(ELEMS[e].∇Nₐ[n2,:])
+                    ELEMS[e].StiffnessMatrix[n1_local_dofs,n2_local_dofs] += transpose(B̃₁) * D̃ * B̃₂ * QP.𝒲
                 end
             end
         end
@@ -478,26 +416,43 @@ function assembleGlobalStiffnessMatrix(ELEMS,NODES)
     return GlobalStiffnessMatrix
 end
 
+function InitialConditions(α, ũ, GEOM)
+    for ns_id = 1:length(GEOM.NodeSets)
+        if isempty(GEOM.NodeSets[ns_id].BC_Type) == false
+            GEOM.NodeSets[ns_id].BC_NL_Solve_Scale = α
+        end
+    end
 
-function newton_raphson(ResidualFun, TangentFun, KnownConditionsFun, u₀, max_nl_step, max_newton_iter, ε) 
+    u = applyBoundaryConditions(ũ, GEOM)
+    R = computeResidual(u, GEOM)
+    return R, u
+end
+
+function newton_raphson(GEOM, max_nl_step, max_newton_iter, ε) 
+    # Initialize
+    num_global_dofs = max(buildNodeGlobalDOFConnectivityArray(GEOM.Nodes)...)
+    u₀ = zeros(Float64, num_global_dofs)
     nl_step = 0
     uₙ = u₀
     while nl_step < max_nl_step
         nl_step += 1
         newton_iter = 0
-        R₀ = ResidualFun(uₙ)
+        R₀ = Inf64 #ResidualFun(uₙ)
+        α = nl_step / max_nl_step;
+        Rₙ, uₙ = InitialConditions(α, uₙ, GEOM)
         uᵢ = uₙ
         while newton_iter < max_newton_iter
             newton_iter += 1
-            print("non-linear step: ", nl_step, " newton iteration: ", newton_iter)
-            Rᵢ = ResidualFun(uᵢ)
-            if LinearAlgebra.norm(Rᵢ) < ε*(LinearAlgebra.norm(R₀)) 
+            println("non-linear step: ", nl_step, " newton iteration: ", newton_iter)
+            Rᵢ = computeResidual(uᵢ,GEOM)
+            println(Rᵢ)
+            if LinearAlgebra.norm(Rᵢ) < ε 
                 break
             end
             println("  residual: ", LinearAlgebra.norm(Rᵢ))
 
-            K = TangentFun(uᵢ)
-            Rᵢ, K, keep_dofs, uᵢ = KnownConditionsFun(Rᵢ, K, uᵢ)
+            K = assembleGlobalStiffnessMatrix(GEOM.Elements, GEOM.Nodes);
+            Rᵢ, K, keep_dofs, uᵢ = applyBoundaryConditions(Rᵢ, K, uᵢ, GEOM)
 
             Δu = collect(K) \ collect(Rᵢ)
             uᵢ[keep_dofs] += Δu  # Will need to replace with an "UpdateFun()"
