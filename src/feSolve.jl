@@ -4,7 +4,7 @@ function feStructuralMechanics(inputFile)
     GEOM,PARAMS = importInput(inputFile);
     GEOM.Elements = buildElementQuadrature(GEOM.Elements, GEOM.Nodes);
     
-    D̃ = computeMaterialStiffnessMatrix(1000,0.1);
+    D̃ = computeMaterialStiffnessMatrix(1.,0.);
 
     GEOM.Elements = computeLocalElementStiffnessMatrices(GEOM.Elements,GEOM.Nodes,D̃);
     # K̃ = u -> assembleGlobalStiffnessMatrix(GEOM.Elements, GEOM.Nodes);

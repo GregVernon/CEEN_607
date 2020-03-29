@@ -143,7 +143,7 @@ end
 function computeMaterialStiffnessMatrix(E, ν)
     D̃ = [1-ν   ν    0;
           ν   1-ν   0;
-          0    0   1-2ν]
+          0    0   (1-2ν)/2]
     
     D̃ *= E/((1+ν)*(1-2ν))
     return D̃
@@ -221,7 +221,7 @@ function computeLocalInternalForceVector(Δu, ELEMS, NODES)
     num_elem = length(ELEMS)
     num_dof_per_node = length(NODES[1].ChildDOFS)
 
-    D̃ = computeMaterialStiffnessMatrix(1000, 0.1)
+    D̃ = computeMaterialStiffnessMatrix(1, 0.)
 
     # Initialize each element's local internal force vector to zero-vector
     for e = 1:num_elem
