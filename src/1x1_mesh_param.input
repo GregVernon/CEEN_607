@@ -1,4 +1,4 @@
-geometry = 1x1_mesh.g
+geometry = mesh/test_1x1.g
 
 begin boundary condition
 	type = Dirichlet
@@ -18,7 +18,7 @@ begin boundary condition
 	type = Dirichlet
 	node set = Right 
 	dof id = 1
-	value = 1.0
+	value = 0.1
 end
 
 begin load_condition # DEACTIVATED
@@ -29,7 +29,7 @@ end # DEACTIVATED
 
 begin load_condition # DEACTIVATED
 	type = body
-	element set = Body
+	element set = Domain
 	direction = [0.0, -1.0]
 	magnitude = 0.0
 end # DEACTIVATED
