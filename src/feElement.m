@@ -21,43 +21,9 @@ classdef feElement
     
     methods
         % Constructors
-        function obj = feElement(nCONN, dCONN, Degree, Dimension, ElementType, Configurations)
+        function obj = feElement()
             %feElement Construct an empty instance of this class
             %   Detailed explanation goes here
-            obj.NodeConnectivity = nCONN;
-            obj.DOFConnectivity  = dCONN;
-            obj.Degree           = Degree;
-            obj.Dimension        = Dimension;
-            obj.ElementType      = ElementType;
-            for ii = 1:length(Configurations)
-                if      strcmpi(Configurations(ii), "Parametric")
-                    obj.Parametric = feElementParametric();
-                elseif  strcmpi(Configurations(ii), "Reference")
-                    obj.Reference = feElementReference();
-                elseif  strcmpi(Configurations(ii), "Deformed")
-                    obj.Deformed = feElementDeformed();
-                else
-                    error("Not a valid configuration type")
-                end
-            end
-        end
-        
-        function obj = createParametricNodes(ElementDegree)
-            num_nodes = prod(ElementDegree+1);
-            obj.Parametric.Nodes = repmat(feNode("Parametric"),num_nodes,1);
-            % Assign nodal coordinates
-            for n = 1:num_nodes
-                nodalCoords = getParametricNodeCoordinates(ElementDegree,n);
-                obj.Parametric.Nodes(n).Coordinates = nodalCoords;
-            end
-        end
-        
-        function obj = createReferenceNodes(ElementNodeCoords)
-            num_nodes = size(ElementNodeCoords,1);
-            obj.Reference.Nodes = repmat(feNode("Reference"),num_nodes,1);
-        end
-        
-        function obj = createDeformedNodes(ElementNodeCoords)
         end
     end
     

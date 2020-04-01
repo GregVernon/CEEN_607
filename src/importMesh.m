@@ -18,8 +18,8 @@ for blk = 1:nBlk
         MESH.Elements(eID).GlobalID = eID;
         MESH.Elements(eID).Type = EXO.element_blocks{3,blk};
         MESH.Elements(eID).NodeConnectivity = EXO.element_blocks{4,blk}(:,e);
-        MESH.Elements(eID).Parametric = feElementConfiguration("Parametric");
-        MESH.Elements(eID).Reference = feElementConfiguration("Reference");
+        MESH.Elements(eID).Parametric = feElementParametric();
+        MESH.Elements(eID).Reference = feElementReference();
                
         %%%% Initialize Parametric Configuration
         MESH.Elements(eID).Parametric.Degree = MESH.Elements(eID).Degree;
@@ -32,10 +32,10 @@ for blk = 1:nBlk
         MESH.Elements(eID).Parametric.Nodes = repmat(feNode(),num_loc_nodes,1);
         for n = 1:num_loc_nodes
             MESH.Elements(eID).Parametric.Nodes(n).ConfigurationType = "Parametric";
-            MESH.Elements(eID).Parametric.Nodes(n).Coordinates = feElementParametric(MESH.Elements(eID).Degree, n);
+            MESH.Elements(eID).Parametric.Nodes(n).Coordinates = feElementParametric.computeNodeCoordinates(MESH.Elements(eID).Degree, n);
             MESH.Elements(eID).Parametric.Nodes(n).Dimension = MESH.Elements(eID).Dimension;
             MESH.Elements(eID).Parametric.Nodes(n).GlobalID = MESH.Elements(eID).NodeConnectivity(n);
-            MESH.Elements(eID).Parametric.Nodes(n).ChildDOF_ID = (MESH.Elements.Parametric.Nodes(n).GlobalID - 1) * MESH.Elements.Parametric.Nodes(n).Dimension + n;
+            MESH.Elements(eID).Parametric.Nodes(n).ChildDOF_ID = (MESH.Elements(eID).Parametric.Nodes(n).GlobalID - 1) * MESH.Elements(eID).Parametric.Nodes(n).Dimension + n;
         end
         
         %%% Parametric Quadrature
@@ -55,13 +55,13 @@ for blk = 1:nBlk
         MESH.Elements(eID).Reference.Type = MESH.Elements(eID).Type;
                
         %%% Reference Nodes
-        MESH.Elements.Reference.Nodes = repmat(feNode(),num_loc_nodes,1);
+        MESH.Elements(eID).Reference.Nodes = repmat(feNode(),num_loc_nodes,1);
         for n = 1:num_loc_nodes
             MESH.Elements(eID).Reference.Nodes(n).ConfigurationType = "Reference";
-            MESH.Elements(eID).Reference.Nodes(n).Coordinates = getExodusNodeCoordinates(EXO, MESH.Elements.Reference.Nodes(n).GlobalID);
+            MESH.Elements(eID).Reference.Nodes(n).Coordinates = getExodusNodeCoordinates(EXO, MESH.Elements(eID).Parametric.Nodes(n).GlobalID);
             MESH.Elements(eID).Reference.Nodes(n).Dimension = MESH.Elements(eID).Dimension;
             MESH.Elements(eID).Reference.Nodes(n).GlobalID = MESH.Elements(eID).NodeConnectivity(n);
-            MESH.Elements(eID).Reference.Nodes(n).ChildDOF_ID = (MESH.Elements.Parametric.Nodes(n).GlobalID - 1) * MESH.Elements.Parametric.Nodes(n).Dimension + n;
+            MESH.Elements(eID).Reference.Nodes(n).ChildDOF_ID = (MESH.Elements(eID).Reference.Nodes(n).GlobalID - 1) * MESH.Elements(eID).Reference.Nodes(n).Dimension + n;
         end
         
         %%% Parametric Quadrature
@@ -81,11 +81,11 @@ end
 function NodeCoords = getExodusNodeCoordinates(EXO, node_id)
 nDim = EXO.naxes;
 if     nDim == 1
-    NodeCoords =  x0(node_id);
+    NodeCoords =  EXO.x0(node_id);
 elseif nDim == 2
-    NodeCoords = [x0(node_id); y0(node_id)];
+    NodeCoords = [EXO.x0(node_id); EXO.y0(node_id)];
 elseif nDim == 3
-    NodeCoords = [x0(node_id); y0(node_id); z0(node_id)];
+    NodeCoords = [EXO.x0(node_id); EXO.y0(node_id); EXO.z0(node_id)];
 end
 
 end
