@@ -15,7 +15,14 @@ classdef feMesh
         end
     end
     
-    methods
+    methods 
+        % Precomputations
+        function obj = precomputeMesh(obj)
+            num_elems = length(obj.Elements);
+            for e = 1:num_elems
+                obj.Elements(e) = obj.Elements(e).precompute();
+            end
+        end
     end
 end
 

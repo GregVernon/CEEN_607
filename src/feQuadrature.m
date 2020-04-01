@@ -31,46 +31,75 @@ classdef feQuadrature
         end
     end
     
-    methods
-        function obj = buildParametricCoordinates(obj, Scheme, NumPoints)
-            if nargin > 1
-                obj.Scheme = Scheme;
-                obj.NumPoints = NumPoints;
-            end
-            nDim = length(obj.NumPoints);
+    methods (Static)
+        function [P,W] = assembleQuadratureRule(nDim, NumPoints, qID)
             if nDim == 1
-                P = cell(obj.NumPoints);
-                W = cell(obj.NumPoints);
-                [P1,W1] = obj.GaussLegendre(obj.NumPoints(1));
+                P = cell(NumPoints,1);
+                W = cell(NumPoints,1);
+                [P1,W1] = feQuadrature.GaussLegendre(NumPoints(1));
                 qp = 0;
-                for ii = 1:obj.NumPoints(1)
+                for ii = 1:NumPoints(1)
                     qp = qp+1;
                     P{qp} = P1(ii);
                     W{qp} = W1(ii);
                 end
             elseif nDim == 2
-                P = cell(prod(obj.NumPoints));
-                W = cell(prod(obj.NumPoints));
-                [P1,W1] = obj.GaussLegendre(obj.NumPoints(1));
-                [P2,W2] = obj.GaussLegendre(obj.NumPoints(2));
-                qp = 0;
-                for jj = 1:obj.NumPoints(2)
-                    for ii = 1:obj.NumPoints(1)
+                P = cell(prod(NumPoints),1);
+                W = cell(prod(NumPoints),1);
+                if qID == 0
+                    [P1,W1] = feQuadrature.GaussLegendre(NumPoints(1));
+                    [P2,W2] = feQuadrature.GaussLegendre(NumPoints(2));
+                    qp = 0;
+                    for jj = 1:NumPoints(2)
+                        for ii = 1:NumPoints(1)
+                            qp = qp+1;
+                            P{qp} = [P1(ii); P2(jj)];
+                            W{qp} = W1(ii) * W2(jj);
+                        end
+                    end
+                elseif qID == 1 % XMin side
+                    [P2,W2] = feQuadrature.GaussLegendre(NumPoints);
+                    qp = 0;
+                    for ii = NumPoints:-1:1
                         qp = qp+1;
-                        P{qp} = [P1(ii) P2(jj)];
-                        W{qp} = W1(ii) * W2(jj);
+                        P{qp} = [-1; P2(ii)];
+                        W{qp} = W2(ii);
+                    end
+                elseif qID == 2
+                    [P2,W2] = feQuadrature.GaussLegendre(NumPoints);
+                    qp = 0;
+                    for ii = 1:NumPoints
+                        qp = qp+1;
+                        P{qp} = [1; P2(ii)];
+                        W{qp} = W2(ii);
+                    end
+                elseif qID == 3 
+                    [P1,W1] = feQuadrature.GaussLegendre(NumPoints);
+                    qp = 0;
+                    for ii = NumPoints:-1:1
+                        qp = qp+1;
+                        P{qp} = [P1(ii); -1];
+                        W{qp} = W1(ii);
+                    end
+                elseif qID == 4
+                    [P1,W1] = feQuadrature.GaussLegendre(NumPoints);
+                    qp = 0;
+                    for ii = 1:NumPoints
+                        qp = qp+1;
+                        P{qp} = [P1(ii); 1];
+                        W{qp} = W1(ii);
                     end
                 end
             elseif nDim == 3
-                P = cell(prod(obj.NumPoints));
-                W = cell(prod(obj.NumPoints));
-                [P1,W1] = obj.GaussLegendre(obj.NumPoints(1));
-                [P2,W2] = obj.GaussLegendre(obj.NumPoints(2));
-                [P3,W3] = obj.GaussLegendre(obj.NumPoints(3));
+                P = cell(prod(NumPoints),1);
+                W = cell(prod(NumPoints),1);
+                [P1,W1] = feQuadrature.GaussLegendre(NumPoints(1));
+                [P2,W2] = feQuadrature.GaussLegendre(NumPoints(2));
+                [P3,W3] = feQuadrature.GaussLegendre(NumPoints(3));
                 qp = 0;
-                for kk = 1:obj.NumPoints(3)
-                    for jj = 1:obj.NumPoints(2)
-                        for ii = 1:obj.NumPoints(1)
+                for kk = 1:NumPoints(3)
+                    for jj = 1:NumPoints(2)
+                        for ii = 1:NumPoints(1)
                             qp = qp+1;
                             P{qp} = [P1(ii) P2(jj) P3(kk)];
                             W{qp} = W1(ii) * W2(jj) * W3(kk);
@@ -78,8 +107,6 @@ classdef feQuadrature
                     end
                 end
             end
-            obj.Coordinates = P;
-            obj.Weights = W;
         end
     end
     
@@ -93,8 +120,8 @@ classdef feQuadrature
                     P = 0;
                     W = 2;
                 case 2
-                    P = [-1/sqrt(3) +1/sqrt(3)];
-                    W = [1 1];
+                    P = [-1/sqrt(3); +1/sqrt(3)];
+                    W = [1; 1];
             end
         end
     end

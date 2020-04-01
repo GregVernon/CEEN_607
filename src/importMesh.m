@@ -10,14 +10,22 @@ eID = 0;
 nBlk = size(EXO.element_blocks,2);
 for blk = 1:nBlk
     nBlkElems = size(EXO.element_blocks{4,blk},2);
-    for e = 1:nBlk
+    for e = 1:nBlkElems
         eID = eID + 1;
         %%%% Element Properties
         MESH.Elements(eID).Degree = [1 1];
         MESH.Elements(eID).Dimension = 2;
         MESH.Elements(eID).GlobalID = eID;
         MESH.Elements(eID).Type = EXO.element_blocks{3,blk};
-        MESH.Elements(eID).NodeConnectivity = EXO.element_blocks{4,blk}(:,e);
+        if     strcmpi(MESH.Elements(eID).Type, "BAR") == true
+            MESH.Elements(eID).NodeConnectivity = EXO.element_blocks{4,blk}(:,e);
+        elseif strcmpi(MESH.Elements(eID).Type, "QUAD4") == true
+            MESH.Elements(eID).NodeConnectivity = EXO.element_blocks{4,blk}([1 2 4 3],e);
+        elseif strcmpi(MESH.Elements(eID).Type, "HEX8") == true
+            MESH.Elements(eID).NodeConnectivity = EXO.element_blocks{4,blk}([1 2 4 3 5 6 8 7],e);
+        else
+            error("Element Type not Supported for Import");
+        end
         MESH.Elements(eID).Parametric = feElementParametric();
         MESH.Elements(eID).Reference = feElementReference();
                
@@ -75,6 +83,9 @@ for blk = 1:nBlk
         MESH.Elements(eID).Reference.Quadrature = Quadrature;
     end
 end
+
+%%%% After initialization, precompute values and cache them
+MESH = MESH.precomputeMesh();
 end
 
 
