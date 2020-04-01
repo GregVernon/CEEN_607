@@ -15,10 +15,9 @@ classdef feNode
     
     methods
         % Constructors
-        function obj = feNode(ConfigurationType)
+        function obj = feNode()
             %feNode Construct an instance of this class
             %   Detailed explanation goes here
-            obj.ConfigurationType = ConfigurationType;
         end
     end
     

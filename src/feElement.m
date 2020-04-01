@@ -10,8 +10,9 @@ classdef feElement
         % Descriptors
         Degree
         Dimension
-        ElementType
-        
+        GlobalID
+        Type
+                
         % Configurations
         Parametric   feElementParametric
         Reference    feElementReference
@@ -54,10 +55,6 @@ classdef feElement
         function obj = createReferenceNodes(ElementNodeCoords)
             num_nodes = size(ElementNodeCoords,1);
             obj.Reference.Nodes = repmat(feNode("Reference"),num_nodes,1);
-            % Assign nodal coordinates
-            for n = 1:num_nodes
-                obj.Reference.Nodes(n)
-            end
         end
         
         function obj = createDeformedNodes(ElementNodeCoords)

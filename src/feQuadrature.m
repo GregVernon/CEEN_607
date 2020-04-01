@@ -32,10 +32,10 @@ classdef feQuadrature
     end
     
     methods
-        function obj = buildParametricCoordinates(obj, Scheme, nPts)
+        function obj = buildParametricCoordinates(obj, Scheme, NumPoints)
             if nargin > 1
                 obj.Scheme = Scheme;
-                obj.NumPoints = nPts;
+                obj.NumPoints = NumPoints;
             end
             nDim = length(obj.NumPoints);
             if nDim == 1
