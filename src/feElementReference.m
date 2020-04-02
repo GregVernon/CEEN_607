@@ -16,6 +16,14 @@ classdef feElementReference
         % Physics
         MaterialConstitutiveMatrix
         
+        % Boundary Conditions
+        DirichletConditions
+        
+        % Load Conditions
+        BodyForce
+        NodeForce
+        SurfacePressure
+        
         % Linear Algebra Stuff
         StiffnessMatrix
         InternalForceVector

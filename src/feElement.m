@@ -158,6 +158,58 @@ classdef feElement
             F = cell2mat(FN);
         end
         
+        function [F, FN] = compute_local_externalforce_vector(obj)
+            num_nodes = length(obj.NodeConnectivity);
+            num_node_dofs = size(obj.DOFConnectivity,1);
+            num_quad_points = length(obj.Parametric.Quadrature(1).Weights);
+            
+            FN = repmat({zeros(num_node_dofs,1)},num_nodes,1);
+            
+            % Compute Body Forces
+            fBody = repmat({zeros(num_node_dofs,1)},num_nodes,1);
+            for qp = 1:num_quad_points
+                S = obj.Reference.Quadrature(1).IntegralScaling{qp};
+                W = obj.Parametric.Quadrature(1).Weights{qp};
+                for n1 = 1:num_nodes
+                    N = obj.Parametric.Quadrature(1).BasisFunction{qp}(n1);
+                    fBody{n1} = fBody{n1} + (N * obj.Reference.BodyForce * S * W);
+                end
+            end
+            
+            % Compute Nodal Forces
+            fNode = obj.Reference.NodeForce;
+            
+            % Compute Surface Pressure Forces
+            num_surf = length(obj.Reference.Quadrature) - 1;
+            fSurfPressure = repmat({zeros(num_node_dofs,1)},num_nodes,num_surf);
+            for qID = 2:num_surf+1
+                num_quad_points = length(obj.Reference.Quadrature(qID).Weights);
+                pressure = obj.Reference.SurfacePressure{qID-1};
+                for qp = 1:num_quad_points
+                    S = obj.Reference.Quadrature(qID).IntegralScaling{qp};
+                    W = obj.Parametric.Quadrature(qID).Weights{qp};
+                    normal = obj.Reference.Quadrature(qID).NormalVector{qp};
+                    for n1 = 1:num_nodes
+                        N = obj.Parametric.Quadrature(qID).BasisFunction{qp}(n1);
+                        fSurfPressure{n1,qID} = fPressue{n1,qID} + (N * (pressure*normal) * S * W);
+                    end
+                end
+            end
+            % Combine surface components
+            fPressure = repmat({zeros(num_node_dofs,1)},num_nodes,1);
+            for qID = 2:num_surf+1
+                fPressure = cellfun(@plus,fPressure,fSurfPressure(:,qID-1),'UniformOutput',false);
+            end
+            
+            % Combine Force Components
+            FN = cellfun(@plus,FN,fBody,'UniformOutput',false);
+            FN = cellfun(@plus,FN,fNode,'UniformOutput',false);
+            FN = cellfun(@plus,FN,fPressure,'UniformOutput',false);
+            
+            % Assemble local force vector
+            F = cell2mat(FN);
+        end
+        
         function virtual_strain = compute_virtual_strain(obj,d_coeff)
             num_nodes = length(obj.NodeConnectivity);
             num_quad_points = length(obj.Parametric.Quadrature(1).Weights);
