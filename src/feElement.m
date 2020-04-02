@@ -200,6 +200,13 @@ classdef feElement
                 tangent = Jacobian * [1; 0];
             end
         end
+        
+        function D = compute_material_consitutive_matrix(E,v)
+            D = (E / ((1+v)*(1-v))) * ...
+                [1-v , v   , 0;
+                 v   , 1-v , 0;
+                 0   , 0   , (1-2*v)/2];
+        end
     end
 end
 
