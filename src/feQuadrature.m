@@ -76,7 +76,7 @@ classdef feQuadrature
                 elseif qID == 3 
                     [P1,W1] = feQuadrature.GaussLegendre(NumPoints);
                     qp = 0;
-                    for ii = NumPoints:-1:1
+                    for ii = 1:NumPoints
                         qp = qp+1;
                         P{qp} = [P1(ii); -1];
                         W{qp} = W1(ii);
@@ -84,7 +84,7 @@ classdef feQuadrature
                 elseif qID == 4
                     [P1,W1] = feQuadrature.GaussLegendre(NumPoints);
                     qp = 0;
-                    for ii = 1:NumPoints
+                    for ii = NumPoints:-1:1
                         qp = qp+1;
                         P{qp} = [P1(ii); 1];
                         W{qp} = W1(ii);
