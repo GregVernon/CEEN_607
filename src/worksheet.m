@@ -1,22 +1,18 @@
 clear
+M = importMesh("mesh/test_1x1.mat");
 
-%% Load mesh
-EXO = load("mesh/test_1x1.mat");
+num_elems = length(M.Elements);
+e = 1;
 
-%% Initialize Mesh class
-MESH = feMesh(EXO.nelems);
+d_coeff = {[0; 0];[0.1; 0];[0; 0];[0.1; 0]};
 
-%% Initialize Elements
-eID = 0;
-nBlk = size(EXO.element_blocks,2);
-for blk = 1:nBlk
-    nBlkElems = size(EXO.element_blocks{4,blk},2);
-    for e = 1:nBlk
-        eID = eID + 1;
-        MESH.Elements(eID).Degree = 1;
-        MESH.Elements(eID).Dimension = 2;
-        MESH.Elements(eID).NodeConnectivity = EXO.element_blocks{4,blk}(:,e);
-        MESH.Configuration_Parametric = feElementConfiguration("Parametric");
-        MESH.Configuration_Reference = feElementConfiguration("Reference");
-    end
-end
+
+M.Elements(e).Reference.MaterialConstitutiveMatrix = feElement.compute_material_consitutive_matrix(1,0);
+M.Elements(e).Reference.DirichletConditions = {[0 0]; [0.1 missing]; [0 0]; [0.1 missing]};
+M.Elements(e).Reference.BodyForce = [0; 0];
+M.Elements(e).Reference.NodeForce = {[0; 0]; [0; 0]; [0; 0]; [0; 0]};
+M.Elements(e).Reference.SurfacePressure = {[0]; [0]; [0]; [0]};
+
+M.Elements(e).Reference.StiffnessMatrix = M.Elements(e).compute_local_stiffness_matrix();
+M.Elements(e).Reference.InternalForceVector = M.Elements(e).compute_local_internalforce_vector(d_coeff);
+M.Elements(e).Reference.ExternalForceVector = M.Elements(e).compute_local_externalforce_vector();
