@@ -139,6 +139,49 @@ classdef feElement
             end
             K = cell2mat(KN);
         end
+        
+        function [F, FN] = compute_local_internalforce_vector(obj, d_coeff)
+            num_nodes = length(obj.NodeConnectivity);
+            num_node_dofs = size(obj.DOFConnectivity,1);
+            num_quad_points = length(obj.Parametric.Quadrature(1).Weights);
+            FN = repmat({zeros(num_node_dofs,1)},num_nodes,1);
+            virtual_strain = obj.compute_virtual_strain(d_coeff);
+            virtual_stress = obj.compute_virtual_stress(virtual_strain);
+            for qp = 1:num_quad_points
+                S = obj.Reference.Quadrature(1).IntegralScaling{qp};
+                W = obj.Parametric.Quadrature(1).Weights{qp};
+                for n1 = 1:num_nodes
+                    B = obj.Reference.Quadrature(1).StrainDisplacementMatrix{qp}{n1};
+                    FN{n1} = FN{n1} + (B * virtual_stress{qp}) * S * W;
+                end
+            end
+            F = cell2mat(FN);
+        end
+        
+        function virtual_strain = compute_virtual_strain(obj,d_coeff)
+            num_nodes = length(obj.NodeConnectivity);
+            num_quad_points = length(obj.Parametric.Quadrature(1).Weights);
+            virtual_strain = cell(num_quad_points,1);
+            for qp = 1:num_quad_points
+                for n1 = 1:num_nodes
+                    B = obj.Reference.Quadrature(1).StrainDisplacementMatrix{qp}{n1};
+                    if n1 == 1
+                        virtual_strain{qp} = zeros(size(B,1),1);
+                    end
+                    virtual_strain{qp} = virtual_strain{qp} + (B * d_coeff{n1});
+                end
+            end
+        end
+        
+        function virtual_stress = compute_virtual_stress(obj,virtual_strain)
+            num_quad_points = length(obj.Parametric.Quadrature(1).Weights);
+            virtual_stress = cell(num_quad_points,1);
+            D = obj.Reference.MaterialConstitutiveMatrix;
+            for qp = 1:num_quad_points
+                virtual_stress{qp} = D * virtual_strain{qp};
+                virtual_stress{qp} = virtual_stress{qp}(1:2);
+            end            
+        end
     end
     
     methods
