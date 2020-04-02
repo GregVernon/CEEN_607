@@ -68,22 +68,28 @@ classdef feElement
                         J = cell(length(P),1);
                         S = cell(length(P),1);
                         G = cell(length(P),1);
+                        B = cell(length(P),1);
                     end
                     if qID == 0
                         P{qp} = feElement.map_parametric_to_reference(obj.Parametric.Quadrature(qID+1).BasisFunction{qp},[obj.Reference.Nodes.Coordinates]');
                         J{qp} = feElement.jacobian_map_parametric_to_reference(obj.Parametric.Quadrature(qID+1).GradientBasisFunction{qp} ,[obj.Reference.Nodes.Coordinates]');
                         S{qp} = feElement.compute_integral_scaling(J{qp}, qID);
                         G{qp} = obj.Parametric.Quadrature(qID+1).GradientBasisFunction{qp} * inv(J{qp});
+                        B{qp} = feElement.assemble_strain_displacement(G{qp});
+                        normal = [];
                     elseif qID == 1 || qID == 2
                         P{qp} = feElement.map_parametric_to_reference(obj.Parametric.Quadrature(qID+1).BasisFunction{qp},[obj.Reference.Nodes.Coordinates]');
                         J{qp} = feElement.jacobian_map_parametric_to_reference(obj.Parametric.Quadrature(qID+1).GradientBasisFunction{qp} ,[obj.Reference.Nodes.Coordinates]');
                         S{qp} = feElement.compute_integral_scaling(J{qp}, qID);
                         G{qp} = obj.Parametric.Quadrature(qID+1).GradientBasisFunction{qp} * inv(J{qp});
+                        B = [];
+%                         normal{qp}
                     elseif qID == 3 || qID == 4
                         P{qp} = feElement.map_parametric_to_reference(obj.Parametric.Quadrature(qID+1).BasisFunction{qp},[obj.Reference.Nodes.Coordinates]');
                         J{qp} = feElement.jacobian_map_parametric_to_reference(obj.Parametric.Quadrature(qID+1).GradientBasisFunction{qp} ,[obj.Reference.Nodes.Coordinates]');
                         S{qp} = feElement.compute_integral_scaling(J{qp}, qID);
                         G{qp} = obj.Parametric.Quadrature(qID+1).GradientBasisFunction{qp} * inv(J{qp});
+                        B = [];
                     end
                 end
                 
@@ -91,6 +97,7 @@ classdef feElement
                 obj.Reference.Quadrature(qID+1).JacobianMatrix = J;
                 obj.Reference.Quadrature(qID+1).IntegralScaling = S;
                 obj.Reference.Quadrature(qID+1).GradientBasisFunction = G;
+                obj.Reference.Quadrature(qID+1).StrainDisplacementMatrix = B;
             end
         end
     end
@@ -152,6 +159,16 @@ classdef feElement
                 intScaleFactor = Jacobian * [0; 1];
             elseif qID == 3 || qID == 4
                 intScaleFactor = Jacobian * [1; 0];               
+            end
+        end
+        
+        function strainDispMatrix = assemble_strain_displacement(GradBasisFun)
+            num_basis_fun = size(GradBasisFun,1);
+            strainDispMatrix = cell(num_basis_fun,1);
+            for n = 1:num_basis_fun
+                strainDispMatrix{n} = [GradBasisFun(n,1), 0;
+                                       0                , GradBasisFun(n,2);
+                                       GradBasisFun(n,2), GradBasisFun(n,1)];
             end
         end
     end
