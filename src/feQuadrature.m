@@ -11,6 +11,7 @@ classdef feQuadrature
         Coordinates
         Weights
         BasisFunction
+        GradientBasisFunction
         IntegralScaling
         % IntegralType: SOLID
         JacobianMatrix
