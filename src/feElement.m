@@ -69,6 +69,8 @@ classdef feElement
                         S = cell(length(P),1);
                         G = cell(length(P),1);
                         B = cell(length(P),1);
+                        tangent = cell(length(P),1);
+                        normal = cell(length(P),1);
                     end
                     if qID == 0
                         P{qp} = feElement.map_parametric_to_reference(obj.Parametric.Quadrature(qID+1).BasisFunction{qp},[obj.Reference.Nodes.Coordinates]');
@@ -76,6 +78,7 @@ classdef feElement
                         S{qp} = feElement.compute_integral_scaling(J{qp}, qID);
                         G{qp} = obj.Parametric.Quadrature(qID+1).GradientBasisFunction{qp} * inv(J{qp});
                         B{qp} = feElement.assemble_strain_displacement(G{qp});
+                        tangent = [];
                         normal = [];
                     elseif qID == 1 || qID == 2
                         P{qp} = feElement.map_parametric_to_reference(obj.Parametric.Quadrature(qID+1).BasisFunction{qp},[obj.Reference.Nodes.Coordinates]');
@@ -83,13 +86,26 @@ classdef feElement
                         S{qp} = feElement.compute_integral_scaling(J{qp}, qID);
                         G{qp} = obj.Parametric.Quadrature(qID+1).GradientBasisFunction{qp} * inv(J{qp});
                         B = [];
-%                         normal{qp}
+                        tangent{qp} = feElement.extract_tangent_from_jacobian(J{qp}, qID);
+                        if     qID == 1
+                            normal{qp} = feElement.compute_normal([0; 0; 1], [tangent{qp}; 0]);
+                        elseif qID == 2
+                            normal{qp} = feElement.compute_normal([tangent{qp}; 0],[0; 0; 1]);
+                        end
+                        normal{qp} = normal{qp}(1:2);
                     elseif qID == 3 || qID == 4
                         P{qp} = feElement.map_parametric_to_reference(obj.Parametric.Quadrature(qID+1).BasisFunction{qp},[obj.Reference.Nodes.Coordinates]');
                         J{qp} = feElement.jacobian_map_parametric_to_reference(obj.Parametric.Quadrature(qID+1).GradientBasisFunction{qp} ,[obj.Reference.Nodes.Coordinates]');
                         S{qp} = feElement.compute_integral_scaling(J{qp}, qID);
                         G{qp} = obj.Parametric.Quadrature(qID+1).GradientBasisFunction{qp} * inv(J{qp});
                         B = [];
+                        tangent{qp} = feElement.extract_tangent_from_jacobian(J{qp}, qID);
+                        if     qID == 3
+                            normal{qp} = feElement.compute_normal([tangent{qp}; 0], [0; 0; 1]);
+                        elseif qID == 4
+                            normal{qp} = feElement.compute_normal([0; 0; 1], [tangent{qp}; 0]);
+                        end
+                        normal{qp} = normal{qp}(1:2);
                     end
                 end
                 
@@ -98,6 +114,7 @@ classdef feElement
                 obj.Reference.Quadrature(qID+1).IntegralScaling = S;
                 obj.Reference.Quadrature(qID+1).GradientBasisFunction = G;
                 obj.Reference.Quadrature(qID+1).StrainDisplacementMatrix = B;
+                obj.Reference.Quadrature(qID+1).NormalVector = normal;
             end
         end
     end
@@ -156,9 +173,9 @@ classdef feElement
             if qID == 0
                 intScaleFactor = det(Jacobian);
             elseif qID == 1 || qID == 2
-                intScaleFactor = Jacobian * [0; 1];
+                intScaleFactor = norm(Jacobian * [0; 1]);
             elseif qID == 3 || qID == 4
-                intScaleFactor = Jacobian * [1; 0];               
+                intScaleFactor = norm(Jacobian * [1; 0]);
             end
         end
         
@@ -169,6 +186,18 @@ classdef feElement
                 strainDispMatrix{n} = [GradBasisFun(n,1), 0;
                                        0                , GradBasisFun(n,2);
                                        GradBasisFun(n,2), GradBasisFun(n,1)];
+            end
+        end
+        
+        function normal = compute_normal(V1, V2)
+            normal = cross(V1, V2) / norm(cross(V1, V2));
+        end
+        
+        function tangent = extract_tangent_from_jacobian(Jacobian, qID)
+            if     qID == 1 || qID == 2
+                tangent = Jacobian * [0; 1];
+            elseif qID == 3 || qID == 4
+                tangent = Jacobian * [1; 0];
             end
         end
     end
