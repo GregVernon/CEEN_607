@@ -20,7 +20,8 @@ for blk = 1:nBlk
         if     strcmpi(MESH.Elements(eID).Type, "BAR") == true
             MESH.Elements(eID).NodeConnectivity = EXO.element_blocks{4,blk}(:,e);
         elseif strcmpi(MESH.Elements(eID).Type, "QUAD4") == true
-            MESH.Elements(eID).NodeConnectivity = EXO.element_blocks{4,blk}([1 2 4 3],e);
+            MESH.Elements(eID).NodeConnectivity = double(EXO.element_blocks{4,blk}([1 2 4 3],e));
+            MESH.Elements(eID).DOFConnectivity = 2*(MESH.Elements(eID).NodeConnectivity' - 1) + [1; 2];
         elseif strcmpi(MESH.Elements(eID).Type, "HEX8") == true
             MESH.Elements(eID).NodeConnectivity = EXO.element_blocks{4,blk}([1 2 4 3 5 6 8 7],e);
         else
