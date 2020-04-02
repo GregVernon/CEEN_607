@@ -65,16 +65,32 @@ classdef feElement
                 for qp = 1:length(P)
                     if qp == 1
                         P = cell(length(P),1);
+                        J = cell(length(P),1);
+                        S = cell(length(P),1);
+                        G = cell(length(P),1);
                     end
                     if qID == 0
                         P{qp} = feElement.map_parametric_to_reference(obj.Parametric.Quadrature(qID+1).BasisFunction{qp},[obj.Reference.Nodes.Coordinates]');
+                        J{qp} = feElement.jacobian_map_parametric_to_reference(obj.Parametric.Quadrature(qID+1).GradientBasisFunction{qp} ,[obj.Reference.Nodes.Coordinates]');
+                        S{qp} = feElement.compute_integral_scaling(J{qp}, qID);
+                        G{qp} = obj.Parametric.Quadrature(qID+1).GradientBasisFunction{qp} * inv(J{qp});
                     elseif qID == 1 || qID == 2
                         P{qp} = feElement.map_parametric_to_reference(obj.Parametric.Quadrature(qID+1).BasisFunction{qp},[obj.Reference.Nodes.Coordinates]');
+                        J{qp} = feElement.jacobian_map_parametric_to_reference(obj.Parametric.Quadrature(qID+1).GradientBasisFunction{qp} ,[obj.Reference.Nodes.Coordinates]');
+                        S{qp} = feElement.compute_integral_scaling(J{qp}, qID);
+                        G{qp} = obj.Parametric.Quadrature(qID+1).GradientBasisFunction{qp} * inv(J{qp});
                     elseif qID == 3 || qID == 4
                         P{qp} = feElement.map_parametric_to_reference(obj.Parametric.Quadrature(qID+1).BasisFunction{qp},[obj.Reference.Nodes.Coordinates]');
+                        J{qp} = feElement.jacobian_map_parametric_to_reference(obj.Parametric.Quadrature(qID+1).GradientBasisFunction{qp} ,[obj.Reference.Nodes.Coordinates]');
+                        S{qp} = feElement.compute_integral_scaling(J{qp}, qID);
+                        G{qp} = obj.Parametric.Quadrature(qID+1).GradientBasisFunction{qp} * inv(J{qp});
                     end
                 end
+                
                 obj.Reference.Quadrature(qID+1).Coordinates = P;
+                obj.Reference.Quadrature(qID+1).JacobianMatrix = J;
+                obj.Reference.Quadrature(qID+1).IntegralScaling = S;
+                obj.Reference.Quadrature(qID+1).GradientBasisFunction = G;
             end
         end
     end
@@ -114,6 +130,28 @@ classdef feElement
             refConfig = zeros(size(refNodes,2),1);
             for n = 1:numBasis
                 refConfig = refConfig + parBasisFun(n) * refNodes(n,:)';
+            end
+        end
+        
+        function refJacobian = jacobian_map_parametric_to_reference(parGradBasisFun, refNodes)
+            numBasis = size(parGradBasisFun,1);
+            refJacobian = zeros(size(parGradBasisFun,2), size(parGradBasisFun,2));
+            for ii = 1:size(parGradBasisFun,2)
+                for jj = 1:size(parGradBasisFun,2)
+                    for n = 1:numBasis
+                        refJacobian(ii,jj) = refJacobian(ii,jj) + parGradBasisFun(n,jj) * refNodes(n,ii);
+                    end
+                end
+            end
+        end
+        
+        function intScaleFactor = compute_integral_scaling(Jacobian, qID)
+            if qID == 0
+                intScaleFactor = det(Jacobian);
+            elseif qID == 1 || qID == 2
+                intScaleFactor = Jacobian * [0; 1];
+            elseif qID == 3 || qID == 4
+                intScaleFactor = Jacobian * [1; 0];               
             end
         end
     end
