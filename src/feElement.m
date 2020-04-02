@@ -152,7 +152,7 @@ classdef feElement
                 W = obj.Parametric.Quadrature(1).Weights{qp};
                 for n1 = 1:num_nodes
                     B = obj.Reference.Quadrature(1).StrainDisplacementMatrix{qp}{n1};
-                    FN{n1} = FN{n1} + (B * virtual_stress{qp}) * S * W;
+                    FN{n1} = FN{n1} + (transpose(B) * virtual_stress{qp}) * S * W;
                 end
             end
             F = cell2mat(FN);
@@ -179,7 +179,6 @@ classdef feElement
             D = obj.Reference.MaterialConstitutiveMatrix;
             for qp = 1:num_quad_points
                 virtual_stress{qp} = D * virtual_strain{qp};
-                virtual_stress{qp} = virtual_stress{qp}(1:2);
             end            
         end
     end
