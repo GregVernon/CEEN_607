@@ -127,12 +127,12 @@ classdef feElement
             KN = repmat({zeros(num_node_dofs,num_node_dofs)},num_nodes,num_nodes);
             D = obj.Reference.MaterialConstitutiveMatrix;
             for qp = 1:num_quad_points
+                S = obj.Reference.Quadrature(1).IntegralScaling{qp};
+                W = obj.Parametric.Quadrature(1).Weights{qp};
                 for n1 = 1:num_nodes
                     B1 = obj.Reference.Quadrature(1).StrainDisplacementMatrix{qp}{n1};
                     for n2 = 1:num_nodes
                         B2 = obj.Reference.Quadrature(1).StrainDisplacementMatrix{qp}{n2};
-                        S = obj.Reference.Quadrature(1).IntegralScaling{qp};
-                        W = obj.Parametric.Quadrature(1).Weights{qp};
                         KN{n1,n2} = KN{n1,n2} + (transpose(B1) * D * B2) * S * W;
                     end
                 end
@@ -183,6 +183,8 @@ classdef feElement
             end            
         end
     end
+    
+    
     
     methods
         function num_qp = computeNumberOfQuadraturePoints(obj, qID)
