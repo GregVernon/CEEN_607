@@ -3,6 +3,8 @@ classdef feMesh
     %   Detailed explanation goes here
     
     properties
+        NodeConnectivity
+        DOFConnectivity
         Elements    feElement
     end
     
@@ -24,5 +26,16 @@ classdef feMesh
             end
         end
     end
+    
+    methods
+        function NodeConnect = gather_node_connectivity(obj)
+            NodeConnect = [obj.Elements.NodeConnectivity];
+        end
+        
+        function DOFConnect = gather_dof_connectivity(obj)
+            DOFConnect = [obj.Elements.DOFConnectivity];
+        end
+    end
+    
 end
 
