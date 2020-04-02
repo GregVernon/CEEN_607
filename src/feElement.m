@@ -210,6 +210,18 @@ classdef feElement
             F = cell2mat(FN);
         end
         
+        function residual_vector = compute_local_residual_vector(obj, d_coeff)
+            if nargin == 1
+                % Use pre-computed internal / external force vectors
+                residual_vector = obj.Reference.ExternalForceVector - obj.Reference.InternalForceVector;
+            else
+                % Calculate internal and external force vectors
+                ExtForce = obj.compute_local_externalforce_vector;
+                IntForce = obj.compute_local_internalforce_vector(d_coeff);
+                residual_vector = ExtForce - IntForce;
+            end
+        end
+        
         function virtual_strain = compute_virtual_strain(obj,d_coeff)
             num_nodes = length(obj.NodeConnectivity);
             num_quad_points = length(obj.Parametric.Quadrature(1).Weights);
