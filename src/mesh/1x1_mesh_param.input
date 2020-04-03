@@ -1,0 +1,35 @@
+geometry = mesh/test_1x1.mat
+
+begin boundary condition
+	type = Dirichlet
+	node set = Left 
+	dof id = 1
+	value = 0.0
+end
+
+begin boundary condition
+	type = Dirichlet
+	node set = Left 
+	dof id = 2
+	value = 0.0
+end
+
+begin boundary condition
+	type = Dirichlet
+	node set = Right 
+	dof id = 1
+	value = 0.1
+end
+
+begin load condition
+	type = pressure
+	surface set = Right 
+	magnitude = 0.0
+end
+
+begin load condition
+	type = body
+	element set = Domain
+	direction = [0.0, -1.0]
+	magnitude = 0.0
+end
