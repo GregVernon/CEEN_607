@@ -41,6 +41,7 @@ for blk = 1:nBlk
         
         %%% Parametric Nodes
         num_loc_nodes = length(MESH.Elements(eID).NodeConnectivity);
+        num_loc_dof = size(MESH.Elements(eID).DOFConnectivity,1);
         MESH.Elements(eID).Parametric.Nodes = repmat(feNode(),num_loc_nodes,1);
         for n = 1:num_loc_nodes
             MESH.Elements(eID).Parametric.Nodes(n).ConfigurationType = "Parametric";
@@ -65,7 +66,12 @@ for blk = 1:nBlk
         MESH.Elements(eID).Reference.Dimension = MESH.Elements(eID).Dimension;
         MESH.Elements(eID).Reference.GlobalID = MESH.Elements(eID).GlobalID;
         MESH.Elements(eID).Reference.Type = MESH.Elements(eID).Type;
-               
+        
+        MESH.Elements(eID).Reference.DirichletConditions = repmat(repmat(missing,num_loc_dof,1),num_loc_nodes,1);
+        MESH.Elements(eID).Reference.BodyForce = zeros(num_loc_dof,1);
+        MESH.Elements(eID).Reference.NodeForce = repmat(zeros(num_loc_dof,1),num_loc_nodes,1);
+        MESH.Elements(eID).Reference.SurfacePressure = repmat([0],num_loc_nodes,1);
+        
         %%% Reference Nodes
         MESH.Elements(eID).Reference.Nodes = repmat(feNode(),num_loc_nodes,1);
         for n = 1:num_loc_nodes
