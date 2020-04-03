@@ -4,7 +4,9 @@ classdef feBoundaryCondition
     
     properties
         Type
-        NodeSetName
+        ElementSet
+        SurfaceSet
+        NodeSet
         DOF
         Value
     end

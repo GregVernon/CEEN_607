@@ -4,8 +4,9 @@ classdef feLoadCondition
     
     properties
         Type
-        ElementSetName
-        SurfaceSetName
+        ElementSet
+        SurfaceSet
+        NodeSet
         Direction
         Magnitude
     end
