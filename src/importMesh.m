@@ -94,6 +94,34 @@ for blk = 1:nBlk
     end
 end
 
+%%%%% Initialize Element Sets
+num_elem_sets = EXO.nblks;
+MESH.ElementSets = repmat(feElementSet(), num_elem_sets, 1);
+eCount = 0;
+for es = 1:num_elem_sets
+    num_blk_elems = size(EXO.element_blocks{4,es},2);
+    MESH.ElementSets(es).Name = EXO.element_blocks{1,es};
+    MESH.ElementSets(es).ElementID = (eCount+1) : (eCount+num_blk_elems);
+end
+
+%%%% Initialize Surface Sets
+num_surf_sets = EXO.nssets;
+MESH.SurfaceSets = repmat(feSurfaceSet(), num_surf_sets, 1);
+for ss = 1:num_surf_sets
+    MESH.SurfaceSets(ss).Name = EXO.side_sets{1,ss};
+    MESH.SurfaceSets(ss).ElementID = EXO.side_sets{3,ss};
+    MESH.SurfaceSets(ss).LocalSideID = ExodusSideID_to_TensorSideID(EXO.element_blocks{3,1}, EXO.side_sets{4,ss});
+    MESH.SurfaceSets(ss).GlobalNodeID = EXO.side_sets{6,ss};
+end
+
+%%%% Initialize Node Sets
+num_node_sets = EXO.nnsets;
+MESH.NodeSets = repmat(feNodeSet(), num_node_sets, 1);
+for ns = 1:num_node_sets
+    MESH.NodeSets{ns}.Name = EXO.node_sets{1,ns};
+    MESH.NodeSets{ns}.GlobalNodeID = EXO.node_sets{3,ns};
+end
+
 %%%% After initialization, precompute values and cache them
 MESH = MESH.precomputeMesh();
 end
@@ -108,5 +136,14 @@ elseif nDim == 2
 elseif nDim == 3
     NodeCoords = [EXO.x0(node_id); EXO.y0(node_id); EXO.z0(node_id)];
 end
+end
 
+function TP_side_id = ExodusSideID_to_TensorSideID(elementType, EXO_sideID)
+if     strcmpi(elementType, "QUAD4")
+    EXO_2_TP_side_map = [4 2 1 3];
+    TP_side_id = EXO_2_TP_side_map(EXO_sideID);
+elseif strcmpi(elementType, "HEX8")
+    EXO_2_TP_side_map = [4 2 5 6 1 3];
+    TP_side_id = EXO_2_TP_side_map(EXO_sideID);
+end
 end
