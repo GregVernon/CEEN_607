@@ -27,6 +27,9 @@ for blk = 1:nBlk
         else
             error("Element Type not Supported for Import");
         end
+        MESH.NodeConnectivity = MESH.gather_node_connectivity();
+        MESH.DOFConnectivity = MESH.gather_dof_connectivity();
+        
         MESH.Elements(eID).Parametric = feElementParametric();
         MESH.Elements(eID).Reference = feElementReference();
                
