@@ -38,14 +38,54 @@ classdef feMesh
     end
     
     methods
-        function [K] = assemble_global_stiffness_matrix(obj)
+        function K = assemble_global_stiffness_matrix(obj)
             num_elems = length(obj.Elements);
-            num_dof = max(obj.DOFConnectivity(:));
+            if isempty(obj.DOFConnectivity)
+                dof_connect = obj.gather_dof_connectivity;
+                num_dof = max(dof_connect(:));
+            else
+                num_dof = max(obj.DOFConnectivity(:));
+            end
+            
             K = zeros(num_dof, num_dof);
             for e = 1:num_elems
                 k = obj.Elements(e).Reference.StiffnessMatrix;
-                local_2_global_dof = obj.Elements(e).DOFConnectivity;
+                local_2_global_dof = obj.Elements(e).DOFConnectivity(:);
                 K(local_2_global_dof,local_2_global_dof) = k;
+            end
+        end
+        
+        function Fext = assemble_global_externalforce_vector(obj)
+            num_elems = length(obj.Elements);
+            if isempty(obj.DOFConnectivity)
+                dof_connect = obj.gather_dof_connectivity;
+                num_dof = max(dof_connect(:));
+            else
+                num_dof = max(obj.DOFConnectivity(:));
+            end
+            
+            Fext = zeros(num_dof,1);
+            for e = 1:num_elems
+                f = obj.Elements(e).Reference.ExternalForceVector;
+                local_2_global_dof = obj.Elements(e).DOFConnectivity(:);
+                Fext(local_2_global_dof) = f;
+            end
+        end
+        
+        function Fint = assemble_global_internalforce_vector(obj)
+            num_elems = length(obj.Elements);
+            if isempty(obj.DOFConnectivity)
+                dof_connect = obj.gather_dof_connectivity;
+                num_dof = max(dof_connect(:));
+            else
+                num_dof = max(obj.DOFConnectivity(:));
+            end
+            
+            Fint = zeros(num_dof,1);
+            for e = 1:num_elems
+                f = obj.Elements(e).Reference.InternalForceVector;
+                local_2_global_dof = obj.Elements(e).DOFConnectivity(:);
+                Fint(local_2_global_dof) = f;
             end
         end
     end
