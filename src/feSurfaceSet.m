@@ -3,6 +3,7 @@ classdef feSurfaceSet
     %   Detailed explanation goes here
     
     properties
+        Name
         ElementID
         LocalSideID
         LocalNodeID

@@ -118,8 +118,8 @@ end
 num_node_sets = EXO.nnsets;
 MESH.NodeSets = repmat(feNodeSet(), num_node_sets, 1);
 for ns = 1:num_node_sets
-    MESH.NodeSets{ns}.Name = EXO.node_sets{1,ns};
-    MESH.NodeSets{ns}.GlobalNodeID = EXO.node_sets{3,ns};
+    MESH.NodeSets(ns).Name = EXO.node_sets{1,ns};
+    MESH.NodeSets(ns).GlobalNodeID = EXO.node_sets{3,ns};
 end
 
 %%%% After initialization, precompute values and cache them
