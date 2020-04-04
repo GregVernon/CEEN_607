@@ -165,7 +165,7 @@ classdef feSolve
                             end
                         end
                     end
-                end                
+                end
             end
         end
     end
