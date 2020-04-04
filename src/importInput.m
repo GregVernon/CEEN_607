@@ -122,6 +122,7 @@ function LC = parseLoadCondition(Card)
         lc_direction_line = Card(lc_direction_index);
         lc_direction = strip(split(lc_direction_line,"="));
         lc_direction = str2num(lc_direction{end});  %#ok<ST2NM>
+        lc_direction = transpose(lc_direction);
     else
         lc_direction = [];
     end
