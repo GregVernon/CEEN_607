@@ -54,7 +54,7 @@ classdef feMesh
             for e = 1:num_elems
                 k = obj.Elements(e).Reference.StiffnessMatrix;
                 local_2_global_dof = obj.Elements(e).DOFConnectivity(:);
-                K(local_2_global_dof,local_2_global_dof) = k;
+                K(local_2_global_dof,local_2_global_dof) = K(local_2_global_dof,local_2_global_dof) + k;
             end
         end
         
@@ -71,7 +71,7 @@ classdef feMesh
             for e = 1:num_elems
                 f = obj.Elements(e).Reference.ExternalForceVector;
                 local_2_global_dof = obj.Elements(e).DOFConnectivity(:);
-                Fext(local_2_global_dof) = f;
+                Fext(local_2_global_dof) = Fext(local_2_global_dof) + f;
             end
         end
         
@@ -88,7 +88,7 @@ classdef feMesh
             for e = 1:num_elems
                 f = obj.Elements(e).Reference.InternalForceVector;
                 local_2_global_dof = obj.Elements(e).DOFConnectivity(:);
-                Fint(local_2_global_dof) = f;
+                Fint(local_2_global_dof) = Fint(local_2_global_dof) + f;
             end
         end
         
