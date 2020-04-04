@@ -166,28 +166,63 @@ classdef feSolve
     end
     
     methods (Static)
-        function plotSolution(solution)
-            hold on;
-            num_elems = length(solution.Mesh.Elements);
-            for e = 1:num_elems
-                xy = [solution.Mesh.Elements(e).Reference.Nodes.Coordinates];
-                x = xy(1,[1 2 4 3]);
-                y = xy(2,[1 2 4 3]);
-                patch('XData',x,'YData',y,'FaceColor','None','EdgeColor','k','LineWidth',1,'Marker','.','MarkerSize',20)
-            end
-            
-            for e = 1:num_elems
-                xy = [solution.Mesh.Elements(e).Reference.Nodes.Coordinates];
-                num_elem_nodes = length(solution.Mesh.Elements(e).NodeConnectivity);
-                xs = zeros(num_elem_nodes,1);
-                ys = zeros(num_elem_nodes,1);
-                for n = 1:num_elem_nodes
-                    xs(n) = solution.Mesh.Elements(e).Reference.Solution{n}(1);
-                    ys(n) = solution.Mesh.Elements(e).Reference.Solution{n}(2);
+        function plotSolution(solution, do_subplot)
+            if nargin == 1
+                figure
+                hold on;
+                num_elems = length(solution.Mesh.Elements);
+                for e = 1:num_elems
+                    xy = [solution.Mesh.Elements(e).Reference.Nodes.Coordinates];
+                    x = xy(1,[1 2 4 3]);
+                    y = xy(2,[1 2 4 3]);
+                    patch('XData',x,'YData',y,'FaceColor','None','EdgeColor','k','LineWidth',1,'Marker','.','MarkerSize',20)
                 end
-                x = xy(1,[1 2 4 3]) + xs([1 2 4 3])';
-                y = xy(2,[1 2 4 3]) + ys([1 2 4 3])';
-                patch('XData',x,'YData',y,'FaceColor','None','EdgeColor','b','LineStyle',':','LineWidth',1,'Marker','.','MarkerSize',20)
+                
+                for e = 1:num_elems
+                    xy = [solution.Mesh.Elements(e).Reference.Nodes.Coordinates];
+                    num_elem_nodes = length(solution.Mesh.Elements(e).NodeConnectivity);
+                    xs = zeros(num_elem_nodes,1);
+                    ys = zeros(num_elem_nodes,1);
+                    for n = 1:num_elem_nodes
+                        xs(n) = solution.Mesh.Elements(e).Reference.Solution{n}(1);
+                        ys(n) = solution.Mesh.Elements(e).Reference.Solution{n}(2);
+                    end
+                    x = xy(1,[1 2 4 3]) + xs([1 2 4 3])';
+                    y = xy(2,[1 2 4 3]) + ys([1 2 4 3])';
+                    patch('XData',x,'YData',y,'FaceColor','None','EdgeColor','b','LineStyle',':','LineWidth',1,'Marker','.','MarkerSize',20)
+                end
+            elseif nargin == 2
+                figure
+                
+                if do_subplot == true
+                    subplot(2,1,1)
+                end
+                hold on;
+                num_elems = length(solution.Mesh.Elements);
+                for e = 1:num_elems
+                    xy = [solution.Mesh.Elements(e).Reference.Nodes.Coordinates];
+                    x = xy(1,[1 2 4 3]);
+                    y = xy(2,[1 2 4 3]);
+                    patch('XData',x,'YData',y,'FaceColor','None','EdgeColor','k','LineWidth',1,'Marker','.','MarkerSize',20)
+                end
+                
+                if do_subplot == true
+                    subplot(2,1,2)
+                end
+                hold on
+                for e = 1:num_elems
+                    xy = [solution.Mesh.Elements(e).Reference.Nodes.Coordinates];
+                    num_elem_nodes = length(solution.Mesh.Elements(e).NodeConnectivity);
+                    xs = zeros(num_elem_nodes,1);
+                    ys = zeros(num_elem_nodes,1);
+                    for n = 1:num_elem_nodes
+                        xs(n) = solution.Mesh.Elements(e).Reference.Solution{n}(1);
+                        ys(n) = solution.Mesh.Elements(e).Reference.Solution{n}(2);
+                    end
+                    x = xy(1,[1 2 4 3]) + xs([1 2 4 3])';
+                    y = xy(2,[1 2 4 3]) + ys([1 2 4 3])';
+                    patch('XData',x,'YData',y,'FaceColor','None','EdgeColor','b','LineStyle',':','LineWidth',1,'Marker','.','MarkerSize',20)
+                end
             end
         end
     end
