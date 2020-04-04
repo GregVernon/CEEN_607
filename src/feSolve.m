@@ -129,7 +129,11 @@ classdef feSolve
                 const_dof_value = const_dof_value(sort_index);
                 
                 % Subtract known equations from RHS
-                Res(const_dof_list) = Res(const_dof_list) - (K(const_dof_list,const_dof_list) * const_dof_value);
+                for d = 1:length(const_dof_list)
+                    Res = Res - K(:,const_dof_list(d)) * const_dof_value(d);
+                end
+                %%% Above is equivalent to:
+                % Res(const_dof_list) = Res(const_dof_list) - (K(const_dof_list,const_dof_list) * const_dof_value);
                 
                 % Remove known equations from system of equations
                 K(const_dof_list,:) = [];
