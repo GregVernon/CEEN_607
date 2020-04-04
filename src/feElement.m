@@ -172,7 +172,7 @@ classdef feElement
                 W = obj.Parametric.Quadrature(1).Weights{qp};
                 for n1 = 1:num_nodes
                     N = obj.Parametric.Quadrature(1).BasisFunction{qp}(n1);
-                    fBody{n1} = fBody{n1} + (N * obj.Reference.BodyForce * S * W);
+                    fBody{n1} = fBody{n1} + N * obj.Reference.BodyForce * S * W;
                 end
             end
             
@@ -183,7 +183,7 @@ classdef feElement
             num_surf = length(obj.Reference.Quadrature) - 1;
             fSurfPressure = repmat({zeros(num_node_dofs,1)},num_nodes,num_surf);
             for qID = 2:num_surf+1
-                num_quad_points = length(obj.Reference.Quadrature(qID).Weights);
+                num_quad_points = length(obj.Parametric.Quadrature(qID).Weights);
                 pressure = obj.Reference.SurfacePressure{qID-1};
                 for qp = 1:num_quad_points
                     S = obj.Reference.Quadrature(qID).IntegralScaling{qp};
@@ -191,7 +191,7 @@ classdef feElement
                     normal = obj.Reference.Quadrature(qID).NormalVector{qp};
                     for n1 = 1:num_nodes
                         N = obj.Parametric.Quadrature(qID).BasisFunction{qp}(n1);
-                        fSurfPressure{n1,qID} = fPressue{n1,qID} + (N * (pressure*normal) * S * W);
+                        fSurfPressure{n1,qID-1} = fSurfPressure{n1,qID-1} + (N * (pressure*normal) * S * W);
                     end
                 end
             end
