@@ -155,7 +155,7 @@ classdef feSolve
                         for node_dof = 1:num_node_dofs
                             for d = 1:length(dof_list)
                                 if dof_list(d) == obj.Mesh.Elements(e).DOFConnectivity(node_dof,n)
-                                    obj.Mesh.Elements(e).Reference.Solution{n}(node_dof) = obj.Mesh.Elements(e).Reference.Solution{n}(node_dof) + du(node_dof);
+                                    obj.Mesh.Elements(e).Reference.Solution{n}(node_dof) = obj.Mesh.Elements(e).Reference.Solution{n}(node_dof) + du(d);
                                 end
                             end
                         end
