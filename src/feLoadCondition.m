@@ -4,9 +4,9 @@ classdef feLoadCondition
     
     properties
         Type
-        ElementSet
-        SurfaceSet
-        NodeSet
+        ElementSet feElementSet
+        SurfaceSet feSurfaceSet
+        NodeSet    feNodeSet
         Direction
         Magnitude
     end

@@ -4,9 +4,9 @@ classdef feBoundaryCondition
     
     properties
         Type
-        ElementSet
-        SurfaceSet
-        NodeSet
+        ElementSet feElementSet
+        SurfaceSet feSurfaceSet
+        NodeSet    feNodeSet
         DOF
         Value
     end

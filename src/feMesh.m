@@ -91,11 +91,34 @@ classdef feMesh
                 Fint(local_2_global_dof) = f;
             end
         end
+        
+        function obj = assignBoundaryConditions(obj, BC)
+            num_boundary_condtions = length(BC);
+            for bndy_id = 1:num_boundary_condtions
+                if strcmpi(BC(bndy_id).Type, "dirichlet")
+                    mesh_node_set_id = strcmpi(BC(bndy_id).NodeSet.Name, {obj.NodeSets(:).Name});
+                    NodeSet = obj.NodeSets(mesh_node_set_id);
+                    num_nodes_in_NodeSet = length(NodeSet.GlobalNodeID);
+                    for n = 1:num_nodes_in_NodeSet
+                        parent_elems = NodeSet.ElementID{n};
+                        for e = 1:length(parent_elems)
+                            global_elem_id = parent_elems(e);
+                            loc_node_id = find(obj.Elements(global_elem_id).NodeConnectivity == NodeSet.GlobalNodeID(n));
+                            num_local_dof = size(obj.Elements(global_elem_id).DOFConnectivity,1);
+                            loc_dof_id = num_local_dof * (loc_node_id - 1) + BC(bndy_id).DOF;
+                            obj.Elements(global_elem_id).Reference.DirichletConditions(loc_dof_id) = BC.Value;
+                        end
+                    end
+                end
+            end
+        end
+        
         function obj = assignLoadConditions(obj, LC)
             num_load_conditions = length(LC);
             for load_id = 1:num_load_conditions
                 if     strcmpi(LC(load_id).Type, "body")
-                    ElementSet = LC(load_id).ElementSet;
+                    mesh_elem_set_id = strcmpi(LC(load_id).ElementSet.Name, {obj.ElementSets(:).Name});
+                    ElementSet = obj.SurfaceSets(mesh_elem_set_id);
                     ElemID = ElementSet.ElementID;
                     M = LC(load_id).Magnitude;
                     D = LC(load_id).Direction;
@@ -105,20 +128,23 @@ classdef feMesh
                         obj.Elements(global_elem_id).Reference.BodyForce = BF;
                     end
                 elseif strcmpi(LC(load_id).Type, "pressure")
-                    SurfaceSet = LC(load_id).SurfaceSet;
+                    mesh_surf_set_id = strcmpi(LC(load_id).SurfaceSet.Name, {obj.SurfaceSets(:).Name});
+                    SurfaceSet = obj.SurfaceSets(mesh_surf_set_id);
                     ElemID = SurfaceSet.ElementID;
                     M = LC(load_id).Magnitude;
                     for loc_elem_id = 1:length(ElemID)
                         % Get global element id
                         global_elem_id = ElemID(loc_elem_id);
                         % Get local element side id
-                        loc_side_id = SurfaceSet.LocalSideID;
+                        loc_side_id = SurfaceSet.LocalSideID(loc_elem_id);
                         % Assign pressure to local element side id
                         obj.Elements(global_elem_id).Reference.SurfacePressure{loc_side_id} = M;
                     end
                 elseif strcmpi(LC(load_id).Type, "force")
                     if     isempty(LC(load_id).SurfaceSetName) == false
                         % Node Force defined on all nodes in a surface set
+                        mesh_surf_set_id = strcmpi(LC(load_id).SurfaceSet.Name, {obj.SurfaceSets(:).Name});
+                        SurfaceSet = obj.SurfaceSets(mesh_surf_set_id);
                         SurfaceSet = LC(load_id).SurfaceSet;
                         ElemID = SurfaceSet.ElementID;
                         M = LC(load_id).Magnitude;
@@ -131,7 +157,8 @@ classdef feMesh
                         end
                     elseif isempty(LC(load_id).NodeSetName) == false
                         % Node Force defined on all nodes in a nosde set
-                        NodeSet = LC(load_id).NodeSet;
+                        mesh_node_set_id = strcmpi(LC(load_id).NodeSet.Name, {obj.NodeSets(:).Name});
+                        NodeSet = obj.SurfaceSets(mesh_node_set_id);
                         ElemID = NodeSet.ElementID;
                         M = LC(load_id).Magnitude;
                         D = LC(load_id).Direction;

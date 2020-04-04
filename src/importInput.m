@@ -89,8 +89,9 @@ function BC = parseBoundaryCondition(Card)
     
     % Create a BoundaryCondition instance and set the values
     BC = feBoundaryCondition();
+    BC.NodeSet = feNodeSet();
+    BC.NodeSet.Name = bc_ns;
     BC.Type = bc_type;
-    BC.NodeSetName = bc_ns;
     BC.DOF = bc_dofid;
     BC.Value = bc_value;
 end
@@ -139,9 +140,11 @@ function LC = parseLoadCondition(Card)
     LC = feLoadCondition();
     LC.Type = lc_type;
     if strcmpi(lc_type, "body")
-        LC.ElementSetName = lc_es;
+        LC.ElementSet = feElementSet();
+        LC.ElementSet.Name = lc_es;
     else
-        LC.SurfaceSetName = lc_ss;
+        LC.SurfaceSet = feSurfaceSet();
+        LC.SurfaceSet.Name = lc_ss;
     end
     LC.Direction = lc_direction;
     LC.Magnitude = lc_magnitude;

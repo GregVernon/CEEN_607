@@ -67,10 +67,10 @@ for blk = 1:nBlk
         MESH.Elements(eID).Reference.GlobalID = MESH.Elements(eID).GlobalID;
         MESH.Elements(eID).Reference.Type = MESH.Elements(eID).Type;
         
-        MESH.Elements(eID).Reference.DirichletConditions = repmat(repmat(missing,num_loc_dof,1),num_loc_nodes,1);
+        MESH.Elements(eID).Reference.DirichletConditions = NaN(num_loc_dof * num_loc_nodes,1);
         MESH.Elements(eID).Reference.BodyForce = zeros(num_loc_dof,1);
-        MESH.Elements(eID).Reference.NodeForce = repmat(zeros(num_loc_dof,1),num_loc_nodes,1);
-        MESH.Elements(eID).Reference.SurfacePressure = repmat([0],num_loc_nodes,1);
+        MESH.Elements(eID).Reference.NodeForce = repmat({zeros(num_loc_dof,1)},num_loc_nodes,1);
+        MESH.Elements(eID).Reference.SurfacePressure = repmat({0},num_loc_nodes,1);
         
         %%% Reference Nodes
         MESH.Elements(eID).Reference.Nodes = repmat(feNode(),num_loc_nodes,1);
@@ -110,7 +110,7 @@ MESH.SurfaceSets = repmat(feSurfaceSet(), num_surf_sets, 1);
 for ss = 1:num_surf_sets
     MESH.SurfaceSets(ss).Name = EXO.side_sets{1,ss};
     MESH.SurfaceSets(ss).ElementID = EXO.side_sets{3,ss};
-    MESH.SurfaceSets(ss).LocalSideID = ExodusSideID_to_TensorSideID(EXO.element_blocks{3,1}, EXO.side_sets{4,ss});
+    MESH.SurfaceSets(ss).LocalSideID = feSurfaceSet.ExodusSideID_to_TensorSideID(EXO.element_blocks{3,1}, EXO.side_sets{4,ss});
     MESH.SurfaceSets(ss).GlobalNodeID = EXO.side_sets{6,ss};
 end
 
@@ -120,6 +120,13 @@ MESH.NodeSets = repmat(feNodeSet(), num_node_sets, 1);
 for ns = 1:num_node_sets
     MESH.NodeSets(ns).Name = EXO.node_sets{1,ns};
     MESH.NodeSets(ns).GlobalNodeID = EXO.node_sets{3,ns};
+    % Determine which elements contain each node in nodeset
+    num_node_in_set = length(MESH.NodeSets(ns).GlobalNodeID);
+    MESH.NodeSets(ns).ElementID = cell(num_node_in_set,1);
+    for n = 1:num_node_in_set
+        global_node_id =  MESH.NodeSets(ns).GlobalNodeID(n);
+        MESH.NodeSets(ns).ElementID{n} = find(any(MESH.NodeConnectivity == global_node_id,1));
+    end
 end
 
 %%%% After initialization, precompute values and cache them
@@ -135,15 +142,5 @@ elseif nDim == 2
     NodeCoords = [EXO.x0(node_id); EXO.y0(node_id)];
 elseif nDim == 3
     NodeCoords = [EXO.x0(node_id); EXO.y0(node_id); EXO.z0(node_id)];
-end
-end
-
-function TP_side_id = ExodusSideID_to_TensorSideID(elementType, EXO_sideID)
-if     strcmpi(elementType, "QUAD4")
-    EXO_2_TP_side_map = [4 2 1 3];
-    TP_side_id = EXO_2_TP_side_map(EXO_sideID);
-elseif strcmpi(elementType, "HEX8")
-    EXO_2_TP_side_map = [4 2 5 6 1 3];
-    TP_side_id = EXO_2_TP_side_map(EXO_sideID);
 end
 end
