@@ -1,4 +1,4 @@
-geometry = mesh/test_1x1.mat
+geometry = mesh/test_10x10.mat
 
 begin boundary condition
 	type = Dirichlet
