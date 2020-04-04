@@ -28,6 +28,9 @@ classdef feElementReference
         StiffnessMatrix
         InternalForceVector
         ExternalForceVector
+        
+        % Solution Container
+        Solution
     end
     
     methods
