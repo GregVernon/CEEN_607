@@ -1,0 +1,40 @@
+reset
+
+create surface rectangle width 1 height 1 zplane 
+surf 1 interval 2
+mesh surf 1
+block 1 surf 1
+block 1 element type QUAD4
+block 1 name "domain"
+
+nodeset 1 add curve 4
+nodeset 1 name "left"
+
+nodeset 2 add curve 2
+nodeset 2 name "right"
+
+nodeset 3 add curve 1
+nodeset 3 name "bottom"
+
+nodeset 4 add curve 3
+nodeset 4 name "top"
+
+sideset 1 add curve 4
+sideset 1 name "left"
+
+sideset 2 add curve 2
+sideset 2 name "right"
+
+sideset 3 add curve 1
+sideset 3 name "bottom"
+
+sideset 4 add curve 3
+sideset 4 name "top"
+
+rotate Surface 1 angle 180 about Z include_merged 
+move surf 1 x 0.5 y 0.5
+
+set exodus netcdf4 off
+set large exodus file on
+export mesh "C:/Users/gregj/Documents/GitHub/CEEN_607/src/mesh/test_2x2.e"  dimension 2  overwrite 
+
