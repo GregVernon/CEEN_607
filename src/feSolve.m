@@ -137,7 +137,8 @@ classdef feSolve
                 Res(const_dof_list) = [];
                 
                 % Test for Convergence
-                if norm(Res) < tol
+                err = norm(Res)
+                if err < tol
                     disp("Converged!")
                     return
                 end
