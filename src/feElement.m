@@ -337,6 +337,11 @@ classdef feElement
                  v   , 1-v , 0;
                  0   , 0   , (1-2*v)/2];
         end
+        
+        function E = green_lagrange_strain(du)
+            F = eye(size(du));
+            E = 1/2 * (transpose(F) * F - I);
+        end
     end
 end
 
