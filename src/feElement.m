@@ -342,6 +342,18 @@ classdef feElement
             F = eye(size(du));
             E = 1/2 * (transpose(F) * F - I);
         end
+        
+        function [cauchy_stress, cauchy_stress_voigt] = compute_cauchy_stress(D, E, F)
+            % D should be a matrix
+            % E should be a vector
+            % F should be a matrix
+            S = D * E;
+            J = det(F);
+            cauchy_stress = 1/J * transpose(F) * S * F;
+            cauchy_stress_voigt = [cauchy_stress(1,1); 
+                                   cauchy_stress(2,2);
+                                   cauchy_stress(1,2) + cauchy_stress(2,1)];
+        end
     end
 end
 
