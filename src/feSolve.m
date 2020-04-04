@@ -85,7 +85,7 @@ classdef feSolve
                 
                 % Evaluate local stiffness matrices
                 for e = 1:num_elems
-                obj.Mesh.Elements(e).Reference.StiffnessMatrix = obj.Mesh.Elements(e).compute_local_stiffness_matrix();
+                    obj.Mesh.Elements(e).Reference.StiffnessMatrix = obj.Mesh.Elements(e).compute_local_stiffness_matrix();
                 end
                 
                 % Evaluate local external force vector
@@ -100,7 +100,7 @@ classdef feSolve
                 end
                 
                 % Assemble global systems
-                K = obj.Mesh.assemble_global_stiffness_matrix();
+                K    = obj.Mesh.assemble_global_stiffness_matrix();
                 Fext = obj.Mesh.assemble_global_externalforce_vector();
                 Fint = obj.Mesh.assemble_global_internalforce_vector();
                 Res = Fext - Fint;
