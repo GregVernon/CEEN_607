@@ -67,7 +67,7 @@ for blk = 1:nBlk
         MESH.Elements(eID).Reference.GlobalID = MESH.Elements(eID).GlobalID;
         MESH.Elements(eID).Reference.Type = MESH.Elements(eID).Type;
         
-        MESH.Elements(eID).Reference.DirichletConditions = NaN(num_loc_dof * num_loc_nodes,1);
+        MESH.Elements(eID).Reference.DirichletConditions = repmat({nan(num_loc_dof,1)},num_loc_nodes,1);
         MESH.Elements(eID).Reference.BodyForce = zeros(num_loc_dof,1);
         MESH.Elements(eID).Reference.NodeForce = repmat({zeros(num_loc_dof,1)},num_loc_nodes,1);
         MESH.Elements(eID).Reference.SurfacePressure = repmat({0},num_loc_nodes,1);

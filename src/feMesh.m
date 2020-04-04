@@ -106,7 +106,7 @@ classdef feMesh
                             loc_node_id = find(obj.Elements(global_elem_id).NodeConnectivity == NodeSet.GlobalNodeID(n));
                             num_local_dof = size(obj.Elements(global_elem_id).DOFConnectivity,1);
                             loc_dof_id = num_local_dof * (loc_node_id - 1) + BC(bndy_id).DOF;
-                            obj.Elements(global_elem_id).Reference.DirichletConditions(loc_dof_id) = BC.Value;
+                            obj.Elements(global_elem_id).Reference.DirichletConditions{loc_node_id}(BC(bndy_id).DOF) = BC(bndy_id).Value;
                         end
                     end
                 end
