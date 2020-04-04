@@ -173,5 +173,27 @@ classdef feMesh
             end
         end
     end
+    
+    methods
+        function plotMesh(obj)
+            hold on;
+            num_elems = length(obj.Elements);
+            for e = 1:num_elems
+                xy = [obj.Elements(e).Reference.Nodes.Coordinates];
+                x = xy(1,[1 2 4 3]);
+                y = xy(2,[1 2 4 3]);
+                patch('XData',x,'YData',y,'FaceColor','None','EdgeColor','k','LineWidth',1,'Marker','.','MarkerSize',20)
+            end
+            
+            for e = 1:num_elems
+                xy = [obj.Elements(e).Reference.Nodes.Coordinates];
+                num_elem_nodes = length(x);
+                for n = 1:num_elem_nodes
+                    global_node_id = obj.Elements(e).NodeConnectivity(n);
+                    text(xy(1,n),xy(2,n),num2str(global_node_id),'FontSize',24)
+                end
+            end
+        end
+    end
 end
 
